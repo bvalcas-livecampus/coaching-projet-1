@@ -6,13 +6,13 @@
 
 ```bash
 cd back-end
-npm install
+yarn install
 ```
 
 ### Démarrage
 
 ```bash
-npm start
+yarn start
 ```
 
 ## Front-end
@@ -21,13 +21,13 @@ npm start
 
 ```bash
 cd front-end
-npm install
+yarn install
 ```
 
 ### Démarrage
 
 ```bash
-npm start
+yarn start
 ```
 
 
