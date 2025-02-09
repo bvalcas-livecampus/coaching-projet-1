@@ -1,0 +1,15 @@
+COMMIT_MSG_FILE=$1
+COMMIT_MSG=$(head -n 1 "$COMMIT_MSG_FILE")
+REGEX_PATTERN="^(feat|fix|chore|docs|style|refactor|perf|test|merge|lint)(\([a-zA-Z0-9-]+\))?: .{1,75}$"
+
+if [[ $COMMIT_MSG =~ ^Merge ]]; then
+    exit 0
+fi
+
+if [[ ! $COMMIT_MSG =~ $REGEX_PATTERN ]]; then
+    echo "Erreur, le message de commit ne correspond pas aux standards des conventionnal commits\n
+    pattern :^(feat|fix|chore|docs|style|refactor|perf|test|merge|lint)(\([a-zA-Z0-9-]+\))?: .{1,75}$"
+    exit 1
+fi
+
+exit 0

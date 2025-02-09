@@ -1,0 +1,40 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '22'  # Specify the Node.js version you need
+
+    - name: Install dependencies
+      run: yarn
+
+    - name: Lint code
+      run: |
+        yarn --cwd "back-end" lint
+        yarn --cwd "front-end" lint
+
+    - name: Run tests back-end
+      run: yarn --cwd "back-end" test
+
+    - name: Run tests front-end
+      run: yarn --cwd "front-end" test
+
+    - name: Cypress run
+      uses: cypress-io/github-action@v6
+      with:
+        build: yarn --cwd "front-end" build
+        start: yarn --cwd "front-end" start
+        browser: chrome
+
