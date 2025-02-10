@@ -1,12 +1,20 @@
 import pool from './bdd.mjs';
+import logger from '../utils/logger.mjs';
 
 /**
  * Retrieves all teams from the database
  * @returns {Promise<Array>} Array of team objects
  */
 export const getTeams = async () => {
-  const result = await pool.query('SELECT * FROM parties');
-  return result.rows;
+  try {
+    logger.info('Retrieving all teams');
+    const result = await pool.query('SELECT * FROM parties');
+    logger.info(`Retrieved ${result.rows.length} teams`);
+    return result.rows;
+  } catch (error) {
+    logger.error('Error retrieving teams:', error);
+    throw error;
+  }
 };
 
 /**
@@ -15,8 +23,15 @@ export const getTeams = async () => {
  * @returns {Promise<Object|null>} Team object if found, null otherwise
  */
 export const getTeamById = async (id) => {
-  const result = await pool.query('SELECT * FROM parties WHERE id = $1', [id]);
-  return result.rows[0];
+  try {
+    logger.info(`Retrieving team with ID: ${id}`);
+    const result = await pool.query('SELECT * FROM parties WHERE id = $1', [id]);
+    logger.info(result.rows[0] ? `Team ${id} found` : `No team found with ID ${id}`);
+    return result.rows[0];
+  } catch (error) {
+    logger.error(`Error retrieving team ${id}:`, error);
+    throw error;
+  }
 };
 
 /**
@@ -26,8 +41,15 @@ export const getTeamById = async (id) => {
  * @returns {Promise<Array>} Array of team objects
  */
 export const getTeamsByCaptainId = async (character) => {
-  const result = await pool.query('SELECT * FROM parties WHERE captain_id = $1', [character.id]);
-  return result.rows;
+  try {
+    logger.info(`Retrieving teams for captain ID: ${character.id}`);
+    const result = await pool.query('SELECT * FROM parties WHERE captain_id = $1', [character.id]);
+    logger.info(`Found ${result.rows.length} teams for captain ${character.id}`);
+    return result.rows;
+  } catch (error) {
+    logger.error(`Error retrieving teams for captain ${character.id}:`, error);
+    throw error;
+  }
 };
 
 /**
@@ -37,9 +59,16 @@ export const getTeamsByCaptainId = async (character) => {
  * @returns {Promise<Array>} Array of team objects
  */
 export const getTeamsByCharacterIds = async (characters) => {
-  const characterIds = characters.map(character => character.id);
-  const result = await pool.query('SELECT * FROM parties WHERE captain_id = ANY($1)', [characterIds]);
-  return result.rows;
+  try {
+    const characterIds = characters.map(character => character.id);
+    logger.info(`Retrieving teams for captain IDs: ${characterIds.join(', ')}`);
+    const result = await pool.query('SELECT * FROM parties WHERE captain_id = ANY($1)', [characterIds]);
+    logger.info(`Found ${result.rows.length} teams for the specified captains`);
+    return result.rows;
+  } catch (error) {
+    logger.error('Error retrieving teams for captains:', error);
+    throw error;
+  }
 };
 
 /**
@@ -51,8 +80,15 @@ export const getTeamsByCharacterIds = async (characters) => {
  * @returns {Promise<Object>} Newly created team object
  */
 export const createTeam = async (leader, registered) => {
-  const result = await pool.query('INSERT INTO parties (captain_id, registered_id) VALUES ($1, $2) RETURNING *', [leader.id, registered.id]);
-  return result.rows[0];
+  try {
+    logger.info(`Creating new team with captain ID: ${leader.id} and registered user ID: ${registered.id}`);
+    const result = await pool.query('INSERT INTO parties (captain_id, registered_id) VALUES ($1, $2) RETURNING *', [leader.id, registered.id]);
+    logger.info(`Created new team with ID: ${result.rows[0].id}`);
+    return result.rows[0];
+  } catch (error) {
+    logger.error('Error creating team:', error);
+    throw error;
+  }
 };
 
 /**
@@ -64,8 +100,15 @@ export const createTeam = async (leader, registered) => {
  * @returns {Promise<Object>} Updated team object
  */
 export const updateTeam = async (team, updateTeam) => {
-  const result = await pool.query('UPDATE parties SET captain_id = $1 WHERE id = $2 RETURNING *', [updateTeam.captain_id, team.id]);
-  return result.rows[0];
+  try {
+    logger.info(`Updating team ${team.id} with new captain ID: ${updateTeam.captain_id}`);
+    const result = await pool.query('UPDATE parties SET captain_id = $1 WHERE id = $2 RETURNING *', [updateTeam.captain_id, team.id]);
+    logger.info(`Team ${team.id} updated successfully`);
+    return result.rows[0];
+  } catch (error) {
+    logger.error(`Error updating team ${team.id}:`, error);
+    throw error;
+  }
 };
 
 /**
@@ -74,6 +117,13 @@ export const updateTeam = async (team, updateTeam) => {
  * @returns {Promise<Object|null>} Deleted team object if found, null otherwise
  */
 export const deleteTeam = async (id) => {
-  const result = await pool.query('DELETE FROM parties WHERE id = $1 RETURNING *', [id]);
-  return result.rows[0];
+  try {
+    logger.info(`Deleting team with ID: ${id}`);
+    const result = await pool.query('DELETE FROM parties WHERE id = $1 RETURNING *', [id]);
+    logger.info(result.rows[0] ? `Team ${id} deleted successfully` : `No team found with ID ${id} to delete`);
+    return result.rows[0];
+  } catch (error) {
+    logger.error(`Error deleting team ${id}:`, error);
+    throw error;
+  }
 };

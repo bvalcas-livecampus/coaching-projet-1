@@ -1,5 +1,6 @@
 import express from 'express';
 import { tournament as _tournamentService } from "../services/index.mjs"
+import logger from '../utils/logger.mjs';
 
 const router = express.Router();
 
@@ -9,8 +10,16 @@ const router = express.Router();
  * @access Public
  * @returns {Object[]} Array of tournament objects
  */
-router.get('/', async (req, res) => {
-    return res.send('Hello World!');
+router.get('/', async (req, res, next) => {
+    try {
+        logger.info('GET /tournament - Fetching all tournaments');
+        const tournaments = await _tournamentService.getAllTournaments();
+        logger.info('GET /tournament - Successfully retrieved tournaments');
+        return res.json(tournaments);
+    } catch (error) {
+        logger.error('GET /tournament - Error fetching tournaments:', error);
+        next(error);
+    }
 });
 
 /**
@@ -20,8 +29,23 @@ router.get('/', async (req, res) => {
  * @access Public
  * @returns {Object} Tournament object
  */
-router.get('/:id', (req, res) => {
-  return res.send('Hello World!');
+router.get('/:id', async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        logger.info(`GET /tournament/${id} - Fetching tournament`);
+        const tournament = await _tournamentService.getTournamentById(id);
+        
+        if (!tournament) {
+            logger.info(`GET /tournament/${id} - Tournament not found`);
+            return res.status(404).json({ error: 'Tournament not found' });
+        }
+
+        logger.info(`GET /tournament/${id} - Successfully retrieved tournament`);
+        return res.json(tournament);
+    } catch (error) {
+        logger.error(`GET /tournament/${id} - Error fetching tournament:`, error);
+        next(error);
+    }
 });
 
 

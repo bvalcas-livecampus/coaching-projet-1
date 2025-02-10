@@ -5,6 +5,7 @@
 
 import dotenv from 'dotenv';
 import pg from 'pg';
+import logger from '../utils/logger.mjs';
 const { Pool } = pg;
 
 /**
@@ -42,11 +43,25 @@ const pool = new Pool({
   database: process.env.BDD_NAME
 });
 
+// Add event listeners for connection lifecycle
+pool.on('connect', () => {
+  logger.info('New client connected to database');
+});
+
+pool.on('error', (err) => {
+  logger.error('Database error:', err);
+});
+
+pool.on('remove', () => {
+  logger.info('Client disconnected from database');
+});
+
 /**
  * Closes the database connection pool.
  * @exports closePool
  */
 export const closePool = async () => {
+  logger.info('Closing database connection pool');
   await pool.end();
 };
 

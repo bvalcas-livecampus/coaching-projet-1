@@ -1,4 +1,5 @@
 import pool from './bdd.mjs';
+import logger from '../utils/logger.mjs';
 
 /**
  * Retrieves a user from the database by their ID
@@ -6,8 +7,17 @@ import pool from './bdd.mjs';
  * @returns {Promise<Object|null>} The user object if found, null otherwise
  */
 export const getUserById = async (id) => {
-  const result = await pool.query('SELECT * FROM user WHERE id = $1', [id]);
-  return result.rows[0];
+  try {
+    logger.info(`Fetching user with ID: ${id}`);
+    const result = await pool.query('SELECT * FROM user WHERE id = $1', [id]);
+    if (!result.rows[0]) {
+      logger.warn(`No user found with ID: ${id}`);
+    }
+    return result.rows[0];
+  } catch (error) {
+    logger.error(`Error fetching user with ID ${id}: ${error.message}`);
+    throw error;
+  }
 };
 
 /**
@@ -19,8 +29,15 @@ export const getUserById = async (id) => {
  * @returns {Promise<Object>} The created user object
  */
 export const createUser = async (user) => {
-  const result = await pool.query('INSERT INTO user (name, email, password) VALUES ($1, $2, $3)', [user.name, user.email, user.password]);
-  return result.rows[0];
+  try {
+    logger.info(`Creating new user with email: ${user.email}`);
+    const result = await pool.query('INSERT INTO user (name, email, password) VALUES ($1, $2, $3)', [user.name, user.email, user.password]);
+    logger.info(`Successfully created user with email: ${user.email}`);
+    return result.rows[0];
+  } catch (error) {
+    logger.error(`Error creating user: ${error.message}`);
+    throw error;
+  }
 };
 
 /**
@@ -33,8 +50,17 @@ export const createUser = async (user) => {
  * @returns {Promise<Object>} The updated user object
  */
 export const updateUser = async (id, user) => {
-  const result = await pool.query('UPDATE user SET name = $1, email = $2, password = $3 WHERE id = $4', [user.name, user.email, user.password, id]);
-  return result.rows[0];
+  try {
+    logger.info(`Updating user with ID: ${id}`);
+    const result = await pool.query('UPDATE user SET name = $1, email = $2, password = $3 WHERE id = $4', [user.name, user.email, user.password, id]);
+    if (!result.rows[0]) {
+      logger.warn(`No user found to update with ID: ${id}`);
+    }
+    return result.rows[0];
+  } catch (error) {
+    logger.error(`Error updating user with ID ${id}: ${error.message}`);
+    throw error;
+  }
 };
 
 /**
@@ -43,6 +69,15 @@ export const updateUser = async (id, user) => {
  * @returns {Promise<Object|null>} The deleted user object if successful, null otherwise
  */
 export const deleteUser = async (id) => {
-  const result = await pool.query('DELETE FROM user WHERE id = $1', [id]);
-  return result.rows[0];
+  try {
+    logger.info(`Deleting user with ID: ${id}`);
+    const result = await pool.query('DELETE FROM user WHERE id = $1', [id]);
+    if (!result.rows[0]) {
+      logger.warn(`No user found to delete with ID: ${id}`);
+    }
+    return result.rows[0];
+  } catch (error) {
+    logger.error(`Error deleting user with ID ${id}: ${error.message}`);
+    throw error;
+  }
 };

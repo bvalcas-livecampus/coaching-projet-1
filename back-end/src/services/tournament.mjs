@@ -1,12 +1,20 @@
 import pool from './bdd.mjs';
+import logger from '../utils/logger.mjs';
 
 /**
  * Retrieves all tournaments from the database
  * @returns {Promise<Array>} Array of tournament objects
  */
 export const getTournament = async () => {
-  const result = await pool.query('SELECT * FROM tournament');
-  return result.rows;
+  try {
+    logger.info('Retrieving all tournaments');
+    const result = await pool.query('SELECT * FROM tournament');
+    logger.info(`Retrieved ${result.rows.length} tournaments`);
+    return result.rows;
+  } catch (error) {
+    logger.error(`Error retrieving tournaments: ${error.message}`);
+    throw error;
+  }
 };
 
 /**
@@ -15,8 +23,15 @@ export const getTournament = async () => {
  * @returns {Promise<Object|null>} Tournament object if found, null otherwise
  */
 export const getTournamentById = async (id) => {
-  const result = await pool.query('SELECT * FROM tournament WHERE id = $1', [id]);
-  return result.rows[0];
+  try {
+    logger.info(`Retrieving tournament with id ${id}`);
+    const result = await pool.query('SELECT * FROM tournament WHERE id = $1', [id]);
+    logger.info(result.rows[0] ? `Tournament ${id} found` : `Tournament ${id} not found`);
+    return result.rows[0];
+  } catch (error) {
+    logger.error(`Error retrieving tournament ${id}: ${error.message}`);
+    throw error;
+  }
 };
 
 /**
@@ -26,8 +41,15 @@ export const getTournamentById = async (id) => {
  * @returns {Promise<Object>} The created tournament object
  */
 export const createTournament = async (tournament) => {
-  const result = await pool.query('INSERT INTO tournament (name) VALUES ($1) RETURNING *', [tournament.name]);
-  return result.rows[0];
+  try {
+    logger.info(`Creating new tournament with name: ${tournament.name}`);
+    const result = await pool.query('INSERT INTO tournament (name) VALUES ($1) RETURNING *', [tournament.name]);
+    logger.info(`Created tournament with id ${result.rows[0].id}`);
+    return result.rows[0];
+  } catch (error) {
+    logger.error(`Error creating tournament: ${error.message}`);
+    throw error;
+  }
 };
 
 /**
@@ -38,8 +60,15 @@ export const createTournament = async (tournament) => {
  * @returns {Promise<Object|null>} Updated tournament object if found, null otherwise
  */
 export const updateTournament = async (id, tournament) => {
-  const result = await pool.query('UPDATE tournament SET name = $1 WHERE id = $2 RETURNING *', [tournament.name, id]);
-  return result.rows[0];
+  try {
+    logger.info(`Updating tournament ${id} with name: ${tournament.name}`);
+    const result = await pool.query('UPDATE tournament SET name = $1 WHERE id = $2 RETURNING *', [tournament.name, id]);
+    logger.info(result.rows[0] ? `Tournament ${id} updated` : `Tournament ${id} not found`);
+    return result.rows[0];
+  } catch (error) {
+    logger.error(`Error updating tournament ${id}: ${error.message}`);
+    throw error;
+  }
 };
 
 /**
@@ -48,7 +77,14 @@ export const updateTournament = async (id, tournament) => {
  * @returns {Promise<Object|null>} Deleted tournament object if found, null otherwise
  */
 export const deleteTournament = async (id) => {
-  const result = await pool.query('DELETE FROM tournament WHERE id = $1 RETURNING *', [id]);
-  return result.rows[0];
+  try {
+    logger.info(`Deleting tournament ${id}`);
+    const result = await pool.query('DELETE FROM tournament WHERE id = $1 RETURNING *', [id]);
+    logger.info(result.rows[0] ? `Tournament ${id} deleted` : `Tournament ${id} not found`);
+    return result.rows[0];
+  } catch (error) {
+    logger.error(`Error deleting tournament ${id}: ${error.message}`);
+    throw error;
+  }
 };
 

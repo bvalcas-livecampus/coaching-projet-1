@@ -6,6 +6,7 @@ import { teams as teamsService,
 } from "../services/index.mjs";
 import charactersMiddleware from "../middleware/characters.mjs";
 import teamsMiddleware from "../middleware/teams.mjs";
+import logger from '../utils/logger.mjs';
 
 const router = express.Router();
 
@@ -14,9 +15,15 @@ const router = express.Router();
  * @description Get all teams
  * @returns {Promise<Array>} Array of team objects
  */
-router.get('/', async (req, res) => {
-    const teams = await teamsService.getTeams();
-    return res.send(teams);
+router.get('/', async (req, res, next) => {
+    try {
+        logger.info('Getting all teams');
+        const teams = await teamsService.getTeams();
+        return res.send(teams);
+    } catch (error) {
+        logger.error('Error getting all teams:', error);
+        return next(error);
+    }
 });
 
 /**
@@ -26,12 +33,19 @@ router.get('/', async (req, res) => {
  * @returns {Promise<Object>} Team object
  * @throws {Error} 404 - Team not found
  */
-router.get('/:id', async (req, res) => {
-    const team = await teamsService.getTeamById(req.params.id);
-    if (!team) {
-        return next({ status: 404, message: 'Team not found' });
+router.get('/:id', async (req, res, next) => {
+    try {
+        logger.info(`Getting team by id: ${req.params.id}`);
+        const team = await teamsService.getTeamById(req.params.id);
+        if (!team) {
+            logger.warn(`Team not found with id: ${req.params.id}`);
+            return next({ status: 404, message: 'Team not found' });
+        }
+        return res.send(team);
+    } catch (error) {
+        logger.error(`Error getting team ${req.params.id}:`, error);
+        return next(error);
     }
-    return res.send(team);
 });
 
 /**
@@ -45,17 +59,26 @@ router.get('/:id', async (req, res) => {
  * @throws {Object} 404 - Tournament not found
  */
 router.post('/', charactersMiddleware, async (req, res, next) => {
-    if (!req.body.tournament_id) {
-        return next({ status: 400, message: 'Tournament ID is required' });
+    try {
+        logger.info(`Creating new team for tournament: ${req.body.tournament_id}`);
+        if (!req.body.tournament_id) {
+            logger.warn('Tournament ID missing in team creation request');
+            return next({ status: 400, message: 'Tournament ID is required' });
+        }
+        const tournament = await tournamentService.getTournamentById(req.body.tournament_id);
+        if (!tournament) {
+            logger.warn(`Tournament not found with id: ${req.body.tournament_id}`);
+            return next({ status: 404, message: 'Tournament not found' });
+        }
+        const registered = await registeredService.registered(tournament, new Date());
+        const team = await teamsService.createTeam(req.characters, registered);
+        await composeService.compose(team, req.characters);
+        logger.info(`Team created successfully with id: ${team.id}`);
+        return res.send(team);
+    } catch (error) {
+        logger.error('Error creating team:', error);
+        return next(error);
     }
-    const tournament = await tournamentService.getTournamentById(req.body.tournament_id);
-    if (!tournament) {
-        return next({ status: 404, message: 'Tournament not found' });
-    }
-    const registered = await registeredService.registered(tournament, new Date());
-    const team = await teamsService.createTeam(req.characters, registered);
-    await composeService.compose(team, req.characters);
-    return res.send(team);
 });
 
 /**
@@ -69,12 +92,20 @@ router.post('/', charactersMiddleware, async (req, res, next) => {
  * @throws {Error} 404 - Team not found
  */
 router.put('/:id', charactersMiddleware, teamsMiddleware, async (req, res, next) => {
-    const team = req.teams.find(team => team.id === req.params.id);
-    if (!team) {
-        return next({ status: 404, message: `Team with id ${req.params.id} not found` });
+    try {
+        logger.info(`Updating team with id: ${req.params.id}`);
+        const team = req.teams.find(team => team.id === req.params.id);
+        if (!team) {
+            logger.warn(`Team not found with id: ${req.params.id}`);
+            return next({ status: 404, message: `Team with id ${req.params.id} not found` });
+        }
+        const updatedTeam = await teamsService.updateTeam(team, req.body);
+        logger.info(`Team updated successfully: ${req.params.id}`);
+        return res.send(updatedTeam);
+    } catch (error) {
+        logger.error(`Error updating team ${req.params.id}:`, error);
+        return next(error);
     }
-    const updatedTeam = await teamsService.updateTeam(team, req.body);
-    return res.send(updatedTeam);
 });
 
 /**
@@ -87,15 +118,23 @@ router.put('/:id', charactersMiddleware, teamsMiddleware, async (req, res, next)
  * @throws {Error} 404 - Team not found
  */
 router.delete('/:id', charactersMiddleware, teamsMiddleware, async (req, res, next) => {
-    const team = req.teams.find(team => team.id === req.params.id);
-    if (!team) {
-        return next({ status: 404, message: `Team with id ${req.params.id} not found` });
+    try {
+        logger.info(`Deleting team with id: ${req.params.id}`);
+        const team = req.teams.find(team => team.id === req.params.id);
+        if (!team) {
+            logger.warn(`Team not found with id: ${req.params.id}`);
+            return next({ status: 404, message: `Team with id ${req.params.id} not found` });
+        }
+        const deletedTeam = await teamsService.deleteTeam(team);
+        const registered = await registeredService.getRegisteredByTeam(team);
+        await registeredService.deleteRegistered(registered);
+        await composeService.deleteCompose(team);
+        logger.info(`Team deleted successfully: ${req.params.id}`);
+        return res.send(deletedTeam);
+    } catch (error) {
+        logger.error(`Error deleting team ${req.params.id}:`, error);
+        return next(error);
     }
-    const deletedTeam = await teamsService.deleteTeam(team);
-    const registered = await registeredService.getRegisteredByTeam(team);
-    await registeredService.deleteRegistered(registered);
-    await composeService.deleteCompose(team);
-    return res.send(deletedTeam);
 });
 
 

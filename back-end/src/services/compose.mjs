@@ -1,4 +1,5 @@
 import pool from './bdd.mjs';
+import logger from '../utils/logger.mjs';
 
 /**
  * Creates a new composition entry linking a character to a team
@@ -7,8 +8,15 @@ import pool from './bdd.mjs';
  * @returns {Promise<Object>} The newly created compose entry
  */
 export const compose = async (team, character) => {
-  const result = await pool.query('INSERT INTO compose (party_id, character_id) VALUES ($1, $2) RETURNING *', [team.id, character.id]);
-  return result.rows[0];
+  try {
+    logger.info(`Creating composition entry for team ${team.id} with character ${character.id}`);
+    const result = await pool.query('INSERT INTO compose (party_id, character_id) VALUES ($1, $2) RETURNING *', [team.id, character.id]);
+    logger.info(`Composition entry created successfully`);
+    return result.rows[0];
+  } catch (error) {
+    logger.error(`Error creating composition entry: ${error.message}`);
+    throw error;
+  }
 };
 
 /**
@@ -17,8 +25,15 @@ export const compose = async (team, character) => {
  * @returns {Promise<Object>} The deleted compose entry
  */
 export const deleteCompose = async (team) => {
-  const result = await pool.query('DELETE FROM compose WHERE party_id = $1 RETURNING *', [team.id]);
-  return result.rows[0];
+  try {
+    logger.info(`Deleting all composition entries for team ${team.id}`);
+    const result = await pool.query('DELETE FROM compose WHERE party_id = $1 RETURNING *', [team.id]);
+    logger.info(`Composition entries deleted successfully`);
+    return result.rows[0];
+  } catch (error) {
+    logger.error(`Error deleting composition entries: ${error.message}`);
+    throw error;
+  }
 };
 
 

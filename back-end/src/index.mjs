@@ -16,9 +16,11 @@ import _tournamentRoutes from './routes/tournament.mjs';
 import authentification from './middleware/authentification.mjs';
 import { closePool } from './services/bdd.mjs';
 import cors from 'cors';
+import logger from './utils/logger.mjs';
 
 dotenv.config();
 const app = express();
+
 
 if (!process.env.SESSION_SECRET) {
   throw new Error("SESSION_SECRET is not defined");
@@ -58,9 +60,11 @@ app.use("/teams", authentification, teamsRoutes);
 // app.use("/users", authentification, usersRoutes);
 // app.use("/tournaments", authentification, tournamentsRoutes);
 
-app.get('*', (_req, _res, next) => {
+app.get('*', (req, res, next) => {
+  logger.error(`Error at ${req.url}: ${res.message}`);
   next({ status: 404, message: 'Page non trouvée' });
 });
+
 
 app.use(errorHandler);
 
@@ -69,7 +73,7 @@ app.use(errorHandler);
  * @type {import('http').Server}
  */
 const server = app.listen(port, () => {
-  console.log(`Server is running on port: ${port}`);
+  logger.info(`Serveur en cours d'exécution sur http://localhost:${port}`);
 });
 
 
