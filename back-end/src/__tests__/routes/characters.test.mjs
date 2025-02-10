@@ -13,12 +13,21 @@ jest.unstable_mockModule('../../services/index.mjs', () => ({
     user: {},
     tournament: {},
     compose: {},
-    registered: {}
+    registered: {},
+    belongTo: {
+        getAllBelongTo: jest.fn(),
+        getBelongTo: jest.fn(),
+        belongTo: jest.fn(),
+        deleteBelongTo: jest.fn()
+    }
 }));
+
+
 
 // Import after mocking
 const services = await import('../../services/index.mjs');
 const mockCharacterService = services.characters;
+const mockBelongToService = services.belongTo;
 let app;
 
 // Mock authentication middleware
@@ -40,10 +49,23 @@ describe('Characters Routes', () => {
         { id: '2', name: 'Character 2', role_id: 2, class_id: 2, ilvl: 410, rio: 2100 }
     ];
 
+    const mockBelongTo = [
+        { id: '1', player_id: '123', character_id: '1' },
+        { id: '2', player_id: '123', character_id: '2' }
+    ];
+
+
+    const mockCharactersWithBelongTo = mockCharacters.map(character => ({
+        ...character,
+        player_id: mockBelongTo.find(b => b.character_id === character.id)?.player_id
+    }));
+
     beforeEach(() => {
         // Clear mock calls before each test
         jest.clearAllMocks();
     });
+
+
 
     afterAll(async () => {
         await app.close();
@@ -53,12 +75,13 @@ describe('Characters Routes', () => {
         it('should return all characters', async () => {
             // Setup mock return value
             mockCharacterService.getCharacters.mockResolvedValue(mockCharacters);
+            mockBelongToService.getAllBelongTo.mockResolvedValue(mockBelongTo);
 
             const response = await request(app)
                 .get('/characters')
                 .expect(200);
 
-            expect(response.body).toEqual(mockCharacters);
+            expect(response.body).toEqual(mockCharactersWithBelongTo);
             expect(mockCharacterService.getCharacters).toHaveBeenCalledTimes(1);
         });
     });
