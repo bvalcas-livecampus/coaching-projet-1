@@ -1,15 +1,17 @@
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
+const servicesPath = '../../services';
+
 // First, set up jest to mock modules
-jest.unstable_mockModule('../services/bdd.mjs', () => ({
+jest.unstable_mockModule(servicesPath + '/bdd.mjs', () => ({
     default: {
         query: jest.fn()
     }
 }));
 
 // Then import the mocked module and the service we want to test
-const { default: pool } = await import('../services/bdd.mjs');
-const { getCharacters, createCharacter, updateCharacter, deleteCharacter } = await import('../services/characters.mjs');
+const { default: pool } = await import(servicesPath + '/bdd.mjs');
+const { getCharacters, createCharacter, updateCharacter, deleteCharacter } = await import(servicesPath + '/characters.mjs');
 
 /**
  * Test suite for Character Service
