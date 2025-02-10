@@ -10,7 +10,7 @@ const router = express.Router();
  * @returns {Object[]} Array of tournament objects
  */
 router.get('/', async (req, res) => {
-    res.send('Hello World!');
+    return res.send('Hello World!');
 });
 
 /**
@@ -21,7 +21,7 @@ router.get('/', async (req, res) => {
  * @returns {Object} Tournament object
  */
 router.get('/:id', (req, res) => {
-  res.send('Hello World!');
+  return res.send('Hello World!');
 });
 
 

@@ -16,7 +16,7 @@ const router = express.Router();
  */
 router.get('/', async (req, res) => {
     const teams = await teamsService.getTeams();
-    res.send(teams);
+    return res.send(teams);
 });
 
 /**
@@ -31,7 +31,7 @@ router.get('/:id', async (req, res) => {
     if (!team) {
         return next({ status: 404, message: 'Team not found' });
     }
-    res.send(team);
+    return res.send(team);
 });
 
 /**
@@ -55,7 +55,7 @@ router.post('/', charactersMiddleware, async (req, res, next) => {
     const registered = await registeredService.registered(tournament, new Date());
     const team = await teamsService.createTeam(req.characters, registered);
     await composeService.compose(team, req.characters);
-    res.send(team);
+    return res.send(team);
 });
 
 /**
@@ -74,7 +74,7 @@ router.put('/:id', charactersMiddleware, teamsMiddleware, async (req, res, next)
         return next({ status: 404, message: `Team with id ${req.params.id} not found` });
     }
     const updatedTeam = await teamsService.updateTeam(team, req.body);
-    res.send(updatedTeam);
+    return res.send(updatedTeam);
 });
 
 /**
@@ -95,7 +95,7 @@ router.delete('/:id', charactersMiddleware, teamsMiddleware, async (req, res, ne
     const registered = await registeredService.getRegisteredByTeam(team);
     await registeredService.deleteRegistered(registered);
     await composeService.deleteCompose(team);
-    res.send(deletedTeam);
+    return res.send(deletedTeam);
 });
 
 

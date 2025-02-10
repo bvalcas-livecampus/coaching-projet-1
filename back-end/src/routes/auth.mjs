@@ -7,7 +7,7 @@ const router = express.Router();
  * @access Public
  */
 router.get('/login', (req, res) => {
-  res.send('Hello World!');
+  return res.send('Hello World!');
 });
 
 /**
@@ -16,7 +16,7 @@ router.get('/login', (req, res) => {
  * @access Public
  */
 router.get('/register', (req, res) => {
-  res.send('Hello World!');
+  return res.send('Hello World!');
 });
 
 /**
@@ -25,7 +25,7 @@ router.get('/register', (req, res) => {
  * @access Public
  */
 router.get('/logout', (req, res) => {
-  res.send('Hello World!');
+  return res.send('Hello World!');
 });
 
 export default router;

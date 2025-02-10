@@ -9,7 +9,7 @@ const router = express.Router();
  * @access Public
  */
 router.get('/', (req, res) => {
-    res.send('Hello World!');
+    return res.send('Hello World!');
 });
 
 /**
@@ -19,7 +19,7 @@ router.get('/', (req, res) => {
  * @access Public
  */
 router.get('/:id', (req, res) => {
-  res.send('Hello World!');
+  return res.send('Hello World!');
 });
 
 

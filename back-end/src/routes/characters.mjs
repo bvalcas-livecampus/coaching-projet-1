@@ -11,7 +11,7 @@ const router = express.Router();
  */
 router.get('/', async (req, res) => {
     const characters = await charactersService.getCharacters();
-    res.send(characters);
+    return res.send(characters);
 });
 
 /**
@@ -26,7 +26,7 @@ router.get('/:id', async (req, res, next) => {
     if (!character) {
         return next({ status: 404, message: 'Character not found' });
     }
-    res.send(character);
+    return res.send(character);
 });
 
 /**
@@ -38,7 +38,7 @@ router.get('/:id', async (req, res, next) => {
  */
 router.post('/', async (req, res) => {
   const character = await charactersService.createCharacter(req.body, req.user.id);
-  res.send(character);
+  return res.send(character);
 });
 
 /**
@@ -55,7 +55,7 @@ router.put('/:id', charactersMiddleware, async (req, res, next) => {
     return next({ status: 404, message: 'Character not found' });
   }
   const updatedCharacter = await charactersService.updateCharacter({ ...character, ...req.body });
-  res.send(updatedCharacter);
+  return res.send(updatedCharacter);
 });
 
 /**
@@ -71,7 +71,7 @@ router.delete('/:id', charactersMiddleware, async (req, res, next) => {
     return next({ status: 404, message: 'Character not found' });
   }
   const deletedCharacter = await charactersService.deleteCharacter(character);
-  res.send(deletedCharacter);
+  return res.send(deletedCharacter);
 });
 
 export default router;
