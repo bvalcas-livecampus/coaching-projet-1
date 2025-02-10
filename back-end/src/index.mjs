@@ -64,11 +64,6 @@ app.use(errorHandler);
  */
 const server = app.listen(port, () => {
   console.log(`Server is running on port: ${port}`);
-}).on('error', (error) => {
-  console.log(`Error starting server on port: ${port} -`, error.message);
-  setTimeout(() => {
-    process.exit(1);
-  }, 1000);
 });
 
 

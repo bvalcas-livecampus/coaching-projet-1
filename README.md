@@ -31,3 +31,14 @@ yarn start
 ```
 
 
+## Tests
+
+### Back-end Tests
+
+Run the test suite for the back-end:
+
+```bash
+cd back-end
+yarn test
+```
+

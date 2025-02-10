@@ -6,7 +6,7 @@
   "scripts": {
     "start": "nodemon index.mjs",
     "lint": "eslint .",
-    "test": "node --experimental-vm-modules --experimental-import-meta-resolve --env-file=.env.test node_modules/jest/bin/jest.js --detectOpenHandles"
+    "test": "node --experimental-vm-modules --experimental-import-meta-resolve --env-file-if-exists=.env.test node_modules/jest/bin/jest.js --detectOpenHandles"
   },
   "author": "",
   "license": "ISC",
