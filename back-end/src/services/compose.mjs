@@ -2,6 +2,23 @@ import pool from './bdd.mjs';
 import logger from '../utils/logger.mjs';
 
 /**
+ * Gets all composition entries for a specific team
+ * @param {Object} team - The team object containing an id property
+ * @returns {Promise<Array>} Array of composition entries
+ */
+export const getCompose = async (team) => {
+  try {
+    logger.info(`Getting composition entries for team ${team.id}`);
+    const result = await pool.query('SELECT * FROM compose WHERE party_id = $1', [team.id]);
+    logger.info(`Found ${result.rows.length} composition entries`);
+    return result.rows;
+  } catch (error) {
+    logger.error(`Error getting composition entries: ${error.message}`);
+    throw error;
+  }
+};
+
+/**
  * Creates a new composition entry linking a character to a team
  * @param {Object} team - The team object containing an id property
  * @param {Object} character - The character object containing an id property

@@ -1,5 +1,7 @@
 import express from 'express';
-import { characters as charactersService } from "../services/index.mjs"
+import { characters as charactersService,
+    belongTo as belongToService
+ } from "../services/index.mjs"
 import charactersMiddleware from "../middleware/characters.mjs"
 import logger from '../utils/logger.mjs';
 
@@ -14,8 +16,17 @@ router.get('/', async (req, res, next) => {
     try {
         logger.info('Fetching all characters');
         const characters = await charactersService.getCharacters();
+        const belongTo = await belongToService.getAllBelongTo();
+
+        const charactersWithBelongTo = characters.map(character => {
+            const belongToEntry = belongTo.find(b => b.character_id === character.id);
+            return {
+                ...character,
+                player_id: belongToEntry.player_id
+            };
+        });
         logger.info(`Retrieved ${characters.length} characters`);
-        return res.send(characters);
+        return res.send(charactersWithBelongTo);
     } catch (error) {
         logger.error('Error fetching characters:', error);
         return next(error);

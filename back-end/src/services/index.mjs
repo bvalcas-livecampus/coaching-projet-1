@@ -21,4 +21,7 @@ import * as compose from "./compose.mjs"
 /** @typedef {import('./registered.mjs')} RegisteredService - Manages registration-related operations */
 import * as registered from "./registered.mjs"
 
-export { user, tournament, teams, characters, compose, registered }
+/** @typedef {import('./belong_to.mjs')} BelongToService - Manages belong_to-related operations */
+import * as belongTo from "./belong_to.mjs"
+
+export { user, tournament, teams, characters, compose, registered, belongTo }
