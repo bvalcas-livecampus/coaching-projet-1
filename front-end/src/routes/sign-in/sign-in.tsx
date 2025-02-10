@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { TextField, Button, Container, Box, Typography } from '@mui/material';
 import { useNavigate } from 'react-router';
 
-function Login() {
+function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic here
+    // Handle sign-in logic here
     navigate('/characters');
   };
 
@@ -23,7 +24,7 @@ function Login() {
         }}
       >
         <Typography component="h1" variant="h5">
-          Log In to your account
+          Sign in to your account
         </Typography>
         
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
@@ -62,18 +63,16 @@ function Login() {
           
           <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
             <Button
-              onClick={() => navigate('/sign-in')}
+              onClick={() => navigate('/')}
               sx={{ textTransform: 'none' }}
             >
-              Create an account
-
+              Already have an account? Login
             </Button>
             <Button
               onClick={() => navigate('/forgot-password')}
               sx={{ textTransform: 'none' }}
             >
               Forgot password?
-
             </Button>
           </Box>
         </Box>
@@ -82,4 +81,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default SignIn;

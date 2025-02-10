@@ -2,7 +2,10 @@ import { BrowserRouter, Routes, Route } from 'react-router';
 import Header from './component/header/header';
 import Login from './routes/login/login';
 import Characters from './routes/characters/characters';
-import EditCharacter from './routes/characters/edit-characters';
+import EditCharacter from './routes/characters/edit-character';
+import SignIn from './routes/sign-in/sign-in';
+import ForgotPassword from './routes/forgot-password/forgot-password';
+import CreateCharacter from './routes/characters/create-character';
 
 function App() {
   return (
@@ -10,8 +13,12 @@ function App() {
       <Routes>
         <Route path="/" element={<Header />}>
           <Route index element={<Login />} />
+          <Route index path="/login" element={<Login />} />
+          <Route path="sign-in" element={<SignIn />} />
           <Route path="characters" element={<Characters />} />
           <Route path="characters/:id/edit" element={<EditCharacter />} />
+          <Route path="forgot-password" element={<ForgotPassword />} />
+          <Route path="characters/create" element={<CreateCharacter />} />
         </Route>
       </Routes>
     </BrowserRouter>

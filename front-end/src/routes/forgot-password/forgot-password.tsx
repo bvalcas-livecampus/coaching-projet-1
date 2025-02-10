@@ -2,14 +2,15 @@ import { useState } from 'react';
 import { TextField, Button, Container, Box, Typography } from '@mui/material';
 import { useNavigate } from 'react-router';
 
-function Login() {
+function ForgotPassword() {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const navigate = useNavigate();
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic here
-    navigate('/characters');
+    // Handle password reset logic here
+    // Usually sends a reset link to the user's email
+    navigate('/login');
   };
 
   return (
@@ -23,7 +24,10 @@ function Login() {
         }}
       >
         <Typography component="h1" variant="h5">
-          Log In to your account
+          Reset Password
+        </Typography>
+        <Typography variant="body2" sx={{ mt: 2, textAlign: 'center' }}>
+          Enter your email address and we'll send you a link to reset your password.
         </Typography>
         
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
@@ -39,41 +43,21 @@ function Login() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label="Password"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
           <Button
             type="submit"
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
           >
-            Sign In
+            Send Reset Link
           </Button>
           
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
             <Button
-              onClick={() => navigate('/sign-in')}
+              onClick={() => navigate('/')}
               sx={{ textTransform: 'none' }}
             >
-              Create an account
-
-            </Button>
-            <Button
-              onClick={() => navigate('/forgot-password')}
-              sx={{ textTransform: 'none' }}
-            >
-              Forgot password?
-
+              Back to Login
             </Button>
           </Box>
         </Box>
@@ -82,4 +66,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default ForgotPassword;
