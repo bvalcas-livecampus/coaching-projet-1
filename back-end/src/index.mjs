@@ -15,6 +15,7 @@ import _userRoutes from './routes/user.mjs';
 import _tournamentRoutes from './routes/tournament.mjs';
 import authentification from './middleware/authentification.mjs';
 import { closePool } from './services/bdd.mjs';
+import cors from 'cors';
 
 dotenv.config();
 const app = express();
@@ -24,6 +25,11 @@ if (!process.env.SESSION_SECRET) {
 } else if (!process.env.JWT_SECRET) {
   throw new Error("JWT_SECRET is not defined");
 }
+
+app.use(cors({
+  origin: 'http://localhost:3000', // React dev server
+  credentials: true // Allow credentials (cookies)
+}));
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
