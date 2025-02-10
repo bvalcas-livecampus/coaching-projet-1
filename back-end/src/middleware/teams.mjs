@@ -8,6 +8,9 @@ import { teams as teamsService } from "../services/index.mjs";
  * @returns {Promise<void>} - Calls next() with teams added to req.teams or error if no teams found
  */
 const getTeams = async (req, res, next) => {
+    if (!req.characters) {
+        return next({ status: 400, message: 'No characters found' });
+    }
     const teams = await teamsService.getTeamsByCharacterIds(req.characters);
     if (teams.length === 0) {
         return next({ status: 400, message: 'No teams found' });

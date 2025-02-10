@@ -37,9 +37,13 @@ router.get('/:id', async (req, res, next) => {
  * @returns {Promise<Object>} Created character object
  */
 router.post('/', async (req, res) => {
+  if (!req.body.name || !req.body.role_id || !req.body.class_id || !req.body.ilvl || !req.body.rio || !req.user || !req.user.id) {
+    return res.status(400).send({ message: 'Missing required fields' });
+  }
   const character = await charactersService.createCharacter(req.body, req.user.id);
   return res.send(character);
 });
+
 
 /**
  * @route PUT /characters/:id
@@ -50,9 +54,13 @@ router.post('/', async (req, res) => {
  * @throws {Object} 404 - Character not found
  */
 router.put('/:id', charactersMiddleware, async (req, res, next) => {
+  if (!req.body.name) {
+    return res.status(400).send({ message: 'Missing required fields' });
+  }
   const character = req.characters.find(character => character.id === req.params.id);
   if (!character) {
     return next({ status: 404, message: 'Character not found' });
+
   }
   const updatedCharacter = await charactersService.updateCharacter({ ...character, ...req.body });
   return res.send(updatedCharacter);
