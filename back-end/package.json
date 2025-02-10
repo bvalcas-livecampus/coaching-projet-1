@@ -6,7 +6,7 @@
   "scripts": {
     "start": "nodemon index.mjs",
     "lint": "eslint .",
-    "test": "jest"
+    "test": "node --experimental-vm-modules --experimental-import-meta-resolve node_modules/jest/bin/jest.js"
   },
   "author": "",
   "license": "ISC",
