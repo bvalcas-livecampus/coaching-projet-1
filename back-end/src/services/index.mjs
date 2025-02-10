@@ -1,11 +1,6 @@
-import * as user from "./user";
-import * as tournament from "./tournament"
-import * as team from "./team"
-import * as characters from "./characters"
+import * as user from "./user.mjs";
+import * as tournament from "./tournament.mjs"
+import * as team from "./team.mjs"
+import * as characters from "./characters.mjs"
 
-export default {
-    user,
-    tournament,
-    team,
-    characters
-}
+export { user, tournament, team, characters }

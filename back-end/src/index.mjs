@@ -5,7 +5,7 @@ import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import errorHandler from './middleware/error.mjs';
 import charactersRoutes from './routes/characters.mjs';
-import teamsRoutes from './routes/teams.mjs';
+import teamsRoutes from './routes/team.mjs';
 import _userRoutes from './routes/user.mjs';
 import _tournamentRoutes from './routes/tournament.mjs';
 import authentification from './middleware/authentification.mjs';

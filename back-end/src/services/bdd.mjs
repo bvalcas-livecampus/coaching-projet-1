@@ -1,5 +1,8 @@
+import dotenv from 'dotenv';
 import pg from 'pg';
 const { Pool } = pg;
+
+dotenv.config();
 
 if (!process.env.BDD_HOST) {
   throw new Error("BDD_HOST is not defined");

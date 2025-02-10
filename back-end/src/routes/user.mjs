@@ -1,5 +1,5 @@
 import express from 'express';
-import { users } from "../services"
+import { user as _userService } from "../services/index.mjs"
 
 const router = express.Router();
 

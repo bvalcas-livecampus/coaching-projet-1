@@ -1,5 +1,6 @@
 import express from 'express';
-import { teams } from "../services"
+import { team as _teamService } from "../services/index.mjs"
+
 
 const router = express.Router();
 
