@@ -43,7 +43,16 @@ const pool = new Pool({
 });
 
 /**
+ * Closes the database connection pool.
+ * @exports closePool
+ */
+export const closePool = async () => {
+  await pool.end();
+};
+
+/**
  * Exports the configured database connection pool.
+
  * @exports pool
  */
 export default pool;

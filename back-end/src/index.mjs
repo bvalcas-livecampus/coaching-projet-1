@@ -14,6 +14,7 @@ import teamsRoutes from './routes/teams.mjs';
 import _userRoutes from './routes/user.mjs';
 import _tournamentRoutes from './routes/tournament.mjs';
 import authentification from './middleware/authentification.mjs';
+import { closePool } from './services/bdd.mjs';
 
 dotenv.config();
 const app = express();
@@ -79,6 +80,8 @@ const server = app.listen(port, () => {
 app.close = () => {
   console.log(`Server closing`);
   server.close();
+  closePool();
 };
+
 
 export default app;
