@@ -9,7 +9,7 @@ router.get('/', async (req, res) => {
     res.send(characters);
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req, res, next) => {
     const character = await charactersService.getCharacterById(req.params.id);
     if (!character) {
         return next({ status: 404, message: 'Character not found' });
@@ -22,7 +22,7 @@ router.post('/', async (req, res) => {
   res.send(character);
 });
 
-router.put('/:id', charactersMiddleware, async (req, res) => {
+router.put('/:id', charactersMiddleware, async (req, res, next) => {
   const character = req.characters.find(character => character.id === req.params.id);
   if (!character) {
     return next({ status: 404, message: 'Character not found' });
@@ -31,7 +31,7 @@ router.put('/:id', charactersMiddleware, async (req, res) => {
   res.send(updatedCharacter);
 });
 
-router.delete('/:id', charactersMiddleware, async (req, res) => {
+router.delete('/:id', charactersMiddleware, async (req, res, next) => {
   const character = req.characters.find(character => character.id === req.params.id);
   if (!character) {
     return next({ status: 404, message: 'Character not found' });
