@@ -62,21 +62,25 @@ app.use(errorHandler);
  * @type {import('http').Server}
  */
 const server = app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+  console.log(`Server is running on port: ${port}`);
 }).on('error', (error) => {
-  console.log('Error starting server:', error);
-  process.exit(1);
+  console.log(`Error starting server on port: ${port} -`, error.message);
+  setTimeout(() => {
+    process.exit(1);
+  }, 1000);
 });
+
 
 /**
  * Closes the server connection
  * @function closeServer
  * @returns {void}
  */
-const closeServer = () => {
-  server.close();
+export const closeServer = () => {
+  if (server) {
+    console.log(`Server closed`);
+    server.close();
+  }
 };
-
-export { closeServer };
 
 export default app;
