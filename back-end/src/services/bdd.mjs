@@ -1,7 +1,15 @@
+/**
+ * Database connection configuration module.
+ * @module services/bdd
+ */
+
 import dotenv from 'dotenv';
 import pg from 'pg';
 const { Pool } = pg;
 
+/**
+ * Load environment variables from .env file
+ */
 dotenv.config();
 
 if (!process.env.BDD_HOST) {
@@ -16,6 +24,16 @@ if (!process.env.BDD_HOST) {
   throw new Error("BDD_NAME is not defined");
 }
 
+/**
+ * PostgreSQL connection pool instance.
+ * Configured using environment variables:
+ * - BDD_HOST: Database host address
+ * - BDD_PORT: Database port number
+ * - BDD_USER: Database user name
+ * - BDD_PASSWORD: Database password
+ * - BDD_NAME: Database name
+ * @type {pg.Pool}
+ */
 const pool = new Pool({
   host: process.env.BDD_HOST,
   port: process.env.BDD_PORT,
@@ -24,4 +42,8 @@ const pool = new Pool({
   database: process.env.BDD_NAME
 });
 
+/**
+ * Exports the configured database connection pool.
+ * @exports pool
+ */
 export default pool;

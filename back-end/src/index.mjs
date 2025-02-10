@@ -1,3 +1,8 @@
+/**
+ * Main application entry point
+ * @module index
+ */
+
 import express from 'express';
 import dotenv from 'dotenv';
 import _authRoutes from './routes/auth.mjs';
@@ -5,7 +10,7 @@ import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import errorHandler from './middleware/error.mjs';
 import charactersRoutes from './routes/characters.mjs';
-import teamsRoutes from './routes/team.mjs';
+import teamsRoutes from './routes/teams.mjs';
 import _userRoutes from './routes/user.mjs';
 import _tournamentRoutes from './routes/tournament.mjs';
 import authentification from './middleware/authentification.mjs';
@@ -34,6 +39,10 @@ app.use(session({
   }
 }));
 
+/**
+ * Port number for the server
+ * @type {number}
+ */
 const port = process.env.PORT || 3001;
 
 //app.use("/", authRoutes);
@@ -48,10 +57,19 @@ app.get('*', (_req, _res, next) => {
 
 app.use(errorHandler);
 
+/**
+ * Express server instance
+ * @type {import('http').Server}
+ */
 const server = app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
 
+/**
+ * Closes the server connection
+ * @function closeServer
+ * @returns {void}
+ */
 export const closeServer = () => {
   server.close();
 };
