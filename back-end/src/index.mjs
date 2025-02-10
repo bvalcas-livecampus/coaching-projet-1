@@ -18,6 +18,8 @@ import authentification from './middleware/authentification.mjs';
 dotenv.config();
 const app = express();
 
+app.isRunning = false;
+
 if (!process.env.SESSION_SECRET) {
   throw new Error("SESSION_SECRET is not defined");
 } else if (!process.env.JWT_SECRET) {
@@ -63,6 +65,7 @@ app.use(errorHandler);
  */
 const server = app.listen(port, () => {
   console.log(`Server is running on port: ${port}`);
+  app.isRunning = true;
 }).on('error', (error) => {
   console.log(`Error starting server on port: ${port} -`, error.message);
   setTimeout(() => {
@@ -76,11 +79,14 @@ const server = app.listen(port, () => {
  * @function closeServer
  * @returns {void}
  */
-export const closeServer = () => {
-  if (server) {
-    console.log(`Server closed`);
-    server.close();
-  }
+app.close = () => {
+  console.log(`Server closing`);
+  server.close((error) => {
+    if (error) {
+      console.log(`Error closing server: ${error.message}`);
+    }
+    app.isRunning = false;
+  });
 };
 
 export default app;
