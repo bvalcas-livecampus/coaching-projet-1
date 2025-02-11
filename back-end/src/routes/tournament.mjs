@@ -77,7 +77,6 @@ router.get('/:id/teams', async (req, res, next) => {
         // Get all teams for these registrations
         const teams = [];
         for (const entry of registeredEntries) {
-            console.log(entry);
             if (entry.id) {
                 const team = await teamsService.getTeamByRegisteredId(entry);
                 if (team) {
