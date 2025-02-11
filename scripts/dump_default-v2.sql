@@ -281,6 +281,7 @@ CREATE TABLE public.parties (
     id integer NOT NULL,
     captain_id integer NOT NULL,
     registered_id integer NOT NULL,
+    name character varying(255) NOT NULL,
     deleted boolean DEFAULT false
 );
 
@@ -662,12 +663,12 @@ COPY public.donjons (id, name, timer) FROM stdin;
 -- Data for Name: parties; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.parties (id, captain_id, registered_id, deleted) FROM stdin;
-1	1	1	f
-2	2	2	f
-3	3	3	f
-4	4	4	f
-5	5	5	f
+COPY public.parties (id, captain_id, registered_id, name, deleted) FROM stdin;
+1	1	1	Thunderfury's Champions	f
+2	2	2	Light Brigade	f
+3	3	3	Shadow Raiders	f
+4	4	4	Nature's Guardians	f
+5	5	5	Arrow Squad	f
 \.
 
 

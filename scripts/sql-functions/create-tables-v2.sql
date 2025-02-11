@@ -81,6 +81,7 @@ CREATE TABLE parties (
     registered_id INT NOT NULL REFERENCES registered(id),
     FOREIGN KEY (captain_id) REFERENCES characters(id),
     FOREIGN KEY (registered_id) REFERENCES registered(id),
+    name VARCHAR(255) NOT NULL,
     deleted BOOLEAN DEFAULT FALSE
 );
 
