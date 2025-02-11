@@ -20,7 +20,9 @@ jest.unstable_mockModule('../../services/index.mjs', () => ({
         belongTo: jest.fn(),
         deleteBelongTo: jest.fn()
     },
-    players: {}
+    players: {},
+    donjons: {},
+    donjonsDone: {}
 }));
 
 

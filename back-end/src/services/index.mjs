@@ -27,6 +27,12 @@ import * as belongTo from "./belong_to.mjs"
 /** @typedef {import('./players.mjs')} PlayersService - Manages player data and player-related operations */
 import * as players from "./players.mjs"
 
+/** @typedef {import('./donjons.mjs')} DonjonsService - Manages donjon data and donjon-related operations */
+import * as donjons from "./donjons.mjs"
+
+/** @typedef {import('./donjons_done.mjs')} DonjonsDoneService - Manages donjon_done data and donjon_done-related operations */
+import * as donjonsDone from "./donjons_done.mjs"
+
 export {
     user,
     tournament,
@@ -35,5 +41,7 @@ export {
     compose,
     registered,
     belongTo,
-    players
+    players,
+    donjons,
+    donjonsDone
 }

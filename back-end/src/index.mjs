@@ -14,6 +14,7 @@ import teamsRoutes from './routes/teams.mjs';
 import _userRoutes from './routes/user.mjs';
 import tournamentRoutes from './routes/tournament.mjs';
 import authentification from './middleware/authentification.mjs';
+import donjonsRoutes from './routes/donjons.mjs';
 import { closePool } from './services/bdd.mjs';
 import cors from 'cors';
 import logger from './utils/logger.mjs';
@@ -60,6 +61,7 @@ app.use("/characters", authentification, charactersRoutes);
 app.use("/teams", authentification, teamsRoutes);
 // app.use("/users", authentification, usersRoutes);
 app.use("/tournament", authentification, tournamentRoutes);
+app.use("/donjons", authentification, donjonsRoutes);
 
 app.get('*', (req, res, next) => {
   logger.error(`Error at ${req.url}: ${res.message}`);
