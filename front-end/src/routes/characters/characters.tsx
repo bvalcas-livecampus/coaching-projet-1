@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { 
   Container, 
   Grid, 
-  Card, 
-  CardContent, 
   Typography, 
   Box,
   CircularProgress,
-  Button,
-  CardActions
+  Paper,
+  Avatar,
+  Chip,
+  Alert
 } from '@mui/material';
 import { fetcher } from '../../api/fetcher';
 import { useNavigate } from 'react-router';
@@ -44,10 +44,6 @@ const Characters: React.FC = () => {
     fetchCharacters();
   }, []);
 
-  const handleEditCharacter = (characterId: number) => {
-    navigate(`/characters/${characterId}/edit`);
-  };
-
   if (loading) {
     return (
       <Container sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
@@ -66,46 +62,55 @@ const Characters: React.FC = () => {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h3" component="h1" gutterBottom>
-        Characters
-      </Typography>
-      
-      <Grid container spacing={4}>
-        {characters.map((character) => (
-          <Grid item key={character.id} xs={12} sm={6} md={4}>
-            <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-              <CardContent>
-                <Typography gutterBottom variant="h5" component="h2">
-                  {character.name}
-                </Typography>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
-                  <Typography variant="body1" color="text.secondary">
-                    Class: {character.class_id}
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary">
-                    Role: {character.role_id}
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary">
-                    Level: {character.ilvl}
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary">
-                    Player ID: {character.player_id}
-                  </Typography>
-                </Box>
-              </CardContent>
-              <CardActions>
-                <Button 
-                  size="small" 
-                  color="primary"
-                  onClick={() => handleEditCharacter(character.id)}
+      <Paper elevation={3} sx={{ p: 4 }}>
+        <Typography variant="h4" component="h1" gutterBottom>
+          Characters
+        </Typography>
+
+        <Box sx={{ mt: 4 }}>
+          <Grid container spacing={2}>
+            {characters.map((character) => (
+              <Grid item xs={12} sm={6} md={4} key={character.id}>
+                <Paper 
+                  sx={{ 
+                    p: 2,
+                    cursor: 'pointer',
+                    '&:hover': {
+                      bgcolor: 'action.hover'
+                    }
+                  }}
+                  onClick={() => navigate(`/characters/${character.id}`)}
                 >
-                  Edit Character
-                </Button>
-              </CardActions>
-            </Card>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Avatar sx={{ bgcolor: 'primary.main' }}>
+                      {character.name.charAt(0)}
+                    </Avatar>
+                    <Box sx={{ flexGrow: 1 }}>
+                      <Typography variant="subtitle1">
+                        {character.name}
+                      </Typography>
+                      <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+                        <Chip 
+                          size="small" 
+                          label={`iLvl ${character.ilvl}`}
+                        />
+                        <Chip 
+                          size="small" 
+                          label={`Class ${character.class_id}`}
+                        />
+                        <Chip 
+                          size="small" 
+                          label={`Role ${character.role_id}`}
+                        />
+                      </Box>
+                    </Box>
+                  </Box>
+                </Paper>
+              </Grid>
+            ))}
           </Grid>
-        ))}
-      </Grid>
+        </Box>
+      </Paper>
     </Container>
   );
 };

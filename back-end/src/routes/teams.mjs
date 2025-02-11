@@ -2,6 +2,7 @@ import express from 'express';
 import { teams as teamsService,
   registered as registeredService,
   tournament as tournamentService,
+  characters as charactersService,
   compose as composeService
 } from "../services/index.mjs";
 import charactersMiddleware from "../middleware/characters.mjs";
@@ -47,6 +48,39 @@ router.get('/:id', async (req, res, next) => {
         return next(error);
     }
 });
+
+/**
+ * @route GET /teams/:id/characters
+ * @description Get all characters in a team
+ * @param {string} req.params.id - Team ID
+ * @returns {Promise<Array>} Array of character objects
+ * @throws {Error} 404 - Team not found
+ */
+router.get('/:id/characters', async (req, res, next) => {
+    try {
+        logger.info(`Getting characters for team: ${req.params.id}`);
+        const team = await teamsService.getTeamById(req.params.id);
+        if (!team) {
+            logger.warn(`Team not found with id: ${req.params.id}`);
+            return next({ status: 404, message: 'Team not found' });
+        }
+        logger.info(`Found team ${team.id}`);
+
+        const characters = await composeService.getCompose(team);
+        logger.info(`Found ${characters.length} composition entries for team ${team.id}`);
+
+        const characterIds = characters.map(compose => compose.character_id);
+        logger.info(`Extracted character IDs: ${characterIds.join(', ')}`);
+
+        const result = await charactersService.getCharactersByIds(characterIds);
+        logger.info(`Retrieved ${result.length} characters for team ${team.id}`);
+        return res.send(result);
+    } catch (error) {
+        logger.error(`Error getting characters for team ${req.params.id}:`, error);
+        return next(error);
+    }
+});
+
 
 /**
  * @route POST /teams

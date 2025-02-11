@@ -35,6 +35,25 @@ export const getTeamById = async (id) => {
 };
 
 /**
+ * Retrieves a team by its registered ID
+ * @param {Object} registered - Registered object containing an id property
+ * @param {number} registered.id - The ID of the registered entry
+ * @returns {Promise<Object|null>} Team object if found, null otherwise
+ */
+export const getTeamByRegisteredId = async (registered) => {
+  try {
+    logger.info(`Retrieving team for registered ID: ${registered.id}`);
+    const result = await pool.query('SELECT * FROM parties WHERE registered_id = $1', [registered.id]);
+    logger.info(result.rows[0] ? `Team found for registered ID ${registered.id}` : `No team found for registered ID ${registered.id}`);
+    return result.rows[0];
+  } catch (error) {
+    logger.error(`Error retrieving team for registered ID ${registered.id}:`, error);
+    throw error;
+  }
+};
+
+
+/**
  * Retrieves all teams where the given character is the captain
  * @param {Object} character - Character object containing an id property
  * @param {number} character.id - The ID of the character

@@ -9,6 +9,8 @@ import CreateCharacter from './routes/characters/create-character';
 import Dashboard from './routes/dashboard/dashboard';
 import TournamentList from './routes/tournament/tournament';
 import TournamentDetails from './routes/tournament/tournament-details';
+import Team from './routes/team/team';
+import CharacterDetails from './routes/characters/character-details';
 
 function App() {
   return (
@@ -20,11 +22,13 @@ function App() {
           <Route path="sign-in" element={<SignIn />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="characters" element={<Characters />} />
+          <Route path="characters/:id" element={<CharacterDetails />} />
           <Route path="characters/:id/edit" element={<EditCharacter />} />
           <Route path="forgot-password" element={<ForgotPassword />} />
           <Route path="characters/create" element={<CreateCharacter />} />
           <Route path="tournament" element={<TournamentList />} />
-          <Route path="tournament/:id" element={<TournamentDetails />} />
+          <Route path="tournament/:tournamentId" element={<TournamentDetails />} />
+          <Route path="tournament/:tournamentId/team/:teamId" element={<Team />} />
         </Route>
       </Routes>
     </BrowserRouter>

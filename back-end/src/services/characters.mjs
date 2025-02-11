@@ -35,6 +35,23 @@ export const getCharacterById = async (id) => {
 };
 
 /**
+ * Retrieves multiple characters by their IDs
+ * @param {Array<number>} ids - Array of character IDs
+ * @returns {Promise<Array>} Array of character objects
+ */
+export const getCharactersByIds = async (ids) => {
+  try {
+    logger.info(`Retrieving characters with IDs: ${ids.join(', ')}`);
+    const result = await pool.query('SELECT * FROM characters WHERE id = ANY($1)', [ids]);
+    logger.info(`Retrieved ${result.rows.length} characters`);
+    return result.rows;
+  } catch (error) {
+    logger.error('Error retrieving characters by IDs:', error);
+    throw error;
+  }
+};
+
+/**
  * Retrieves all characters belonging to a specific user
  * @param {number} userId - The user's ID
  * @returns {Promise<Array>} Array of character objects
