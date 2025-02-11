@@ -38,14 +38,18 @@ export const getTournamentById = async (id) => {
  * Creates a new tournament in the database
  * @param {Object} tournament - The tournament object to create
  * @param {string} tournament.name - The name of the tournament
+ * @param {Date} tournament.start_date - The start date of the tournament
+ * @param {Date} tournament.end_date - The end date of the tournament
+ * @param {number} tournament.cost_to_registry - The registration cost
+ * @param {string} tournament.description - The tournament description
  * @returns {Promise<Object>} The created tournament object
  */
 export const createTournament = async (tournament) => {
   try {
     logger.info(`Creating new tournament with name: ${tournament.name}`);
     const result = await pool.query(
-      'INSERT INTO tournament (name, start_date, end_date) VALUES ($1, $2, $3) RETURNING *',
-      [tournament.name, tournament.start_date, tournament.end_date]
+      'INSERT INTO tournament (name, start_date, end_date, cost_to_registry, description) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [tournament.name, tournament.start_date, tournament.end_date, tournament.cost_to_registry, tournament.description]
     );
     logger.info(`Created tournament with id ${result.rows[0].id}`);
     return result.rows[0];

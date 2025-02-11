@@ -12,8 +12,9 @@ import {
   Alert,
   Box
 } from '@mui/material';
-import { CalendarToday, EventAvailable } from '@mui/icons-material';
+import { CalendarToday, EventAvailable, Add as AddIcon } from '@mui/icons-material';
 import { fetcher } from '../../api/fetcher';
+import { useNavigate } from 'react-router';
 
 interface Tournament {
   id: number;
@@ -26,6 +27,7 @@ const TournamentList: React.FC = () => {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchTournaments = async () => {
@@ -60,9 +62,19 @@ const TournamentList: React.FC = () => {
 
   return (
     <Container sx={{ py: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Tournaments
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h4" component="h1">
+          Tournaments
+        </Typography>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<AddIcon />}
+          onClick={() => navigate('/tournament/create')}
+        >
+          Create Tournament
+        </Button>
+      </Box>
       <Grid container spacing={3}>
         {tournaments.map((tournament) => (
           <Grid item xs={12} sm={6} md={4} key={tournament.id}>

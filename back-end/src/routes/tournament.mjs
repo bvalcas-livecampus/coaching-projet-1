@@ -93,6 +93,35 @@ router.get('/:id/teams', async (req, res, next) => {
     }
 });
 
+/**
+ * @route POST /tournament
+ * @description Create a new tournament
+ * @access Public
+ * @returns {Object} Created tournament object
+ */
+router.post('/', async (req, res, next) => {
+    try {
+        const { name, start_date, end_date, cost_to_registry, description } = req.body;
+        logger.info('POST /tournament - Creating new tournament');
 
+        if (!name || !start_date || !end_date || cost_to_registry === undefined || !description) {
+            return next({ status: 400, message: 'Missing required fields' });
+        }
+
+        const tournament = await tournamentService.createTournament({
+            name,
+            start_date,
+            end_date,
+            cost_to_registry,
+            description
+        });
+
+        logger.info(`POST /tournament - Successfully created tournament with id ${tournament.id}`);
+        return res.status(201).send(tournament);
+    } catch (error) {
+        logger.error('POST /tournament - Error creating tournament:', error);
+        next(error);
+    }
+});
 
 export default router;
