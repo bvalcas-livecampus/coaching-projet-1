@@ -61,7 +61,10 @@ CREATE TABLE belong_to (
 CREATE TABLE tournament (
     id SERIAL PRIMARY KEY,
     start_date DATE NOT NULL,
-    end_date DATE NOT NULL
+    end_date DATE NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    cost_to_registry INT NOT NULL,
+    description VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE registered (
@@ -74,7 +77,7 @@ CREATE TABLE registered (
 CREATE TABLE parties (
     id SERIAL PRIMARY KEY,
     captain_id INT NOT NULL REFERENCES characters(id),
-    registered_id INT REFERENCES registered(id),
+    registered_id INT NOT NULL REFERENCES registered(id),
     FOREIGN KEY (captain_id) REFERENCES characters(id),
     FOREIGN KEY (registered_id) REFERENCES registered(id)
 );

@@ -8,6 +8,8 @@ DROP TABLE IF EXISTS registered CASCADE;
 DROP TABLE IF EXISTS tournament CASCADE;
 DROP TABLE IF EXISTS role CASCADE;
 DROP TABLE IF EXISTS class CASCADE;
+DROP TABLE IF EXISTS donjons CASCADE;
+DROP TABLE IF EXISTS donjon_done CASCADE;
 
 CREATE TABLE role (
     id SERIAL PRIMARY KEY,
@@ -59,7 +61,10 @@ CREATE TABLE belong_to (
 CREATE TABLE tournament (
     id SERIAL PRIMARY KEY,
     start_date DATE NOT NULL,
-    end_date DATE NOT NULL
+    end_date DATE NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    cost_to_registry INT NOT NULL,
+    description VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE registered (
@@ -84,6 +89,22 @@ CREATE TABLE compose (
     FOREIGN KEY (character_id) REFERENCES characters(id),
     FOREIGN KEY (party_id) REFERENCES parties(id),
     PRIMARY KEY (character_id, party_id)
+);
+
+CREATE TABLE donjons (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    timer INT NOT NULL
+);
+
+CREATE TABLE donjon_done (
+    id SERIAL,
+    party_id INT NOT NULL REFERENCES parties(id),
+    donjon_id INT NOT NULL REFERENCES donjons(id),
+    timer INT NOT NULL,
+    FOREIGN KEY (party_id) REFERENCES parties(id),
+    FOREIGN KEY (donjon_id) REFERENCES donjons(id),
+    PRIMARY KEY (party_id, donjon_id)
 );
 
 TRUNCATE TABLE role CASCADE;
@@ -268,3 +289,16 @@ INSERT INTO compose (character_id, party_id) VALUES
     (5, 4),  -- Arrowmaster joins Naturewarden's party
     
     (5, 5);  -- Arrowmaster in their own party
+
+TRUNCATE TABLE donjons CASCADE;
+
+INSERT INTO donjons (name, timer) VALUES
+    ('The Stonevault', 33),
+    ('The Dawnbreaker', 35),
+    ('Ara-Kara, City of Echoes', 30),
+    ('City of Threads', 38),
+    ('Mists of Tirna Scithe', 30),
+    ('The Necrotic Wake', 36),
+    ('Siege of Boralus', 36),
+    ('Grim Batol', 34);
+
