@@ -63,8 +63,6 @@ const CreateTeam: React.FC = () => {
     setError(null);
 
     try {
-
-        console.log("formData", formData);
       await fetcher(`/teams`, {
         method: 'POST',
         body: JSON.stringify({
