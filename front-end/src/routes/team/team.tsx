@@ -353,7 +353,7 @@ const Team: React.FC = () => {
             </Box>
           ) : (
             <Typography variant="body2" color="text.secondary">
-              Tournament has ended - team can no longer be modified
+              Tournament has ended
             </Typography>
           )}
         </Box>
