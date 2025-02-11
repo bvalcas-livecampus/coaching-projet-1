@@ -198,7 +198,7 @@ const EditTournament: React.FC = () => {
           <Button
             fullWidth
             variant="outlined"
-            onClick={() => navigate('/tournament')}
+            onClick={() => navigate(-1)}
             disabled={loading}
           >
             Cancel
