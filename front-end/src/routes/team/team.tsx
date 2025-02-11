@@ -10,9 +10,14 @@ import {
   Grid,
   Chip,
   Avatar,
-  Button
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  DialogContentText
 } from '@mui/material';
-import { Star as StarIcon, Edit as EditIcon } from '@mui/icons-material';
+import { Star as StarIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { fetcher } from '../../api/fetcher';
 
 interface Character {
@@ -48,6 +53,7 @@ const Team: React.FC = () => {
   const [characters, setCharacters] = useState<Character[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -70,6 +76,27 @@ const Team: React.FC = () => {
 
     fetchData();
   }, [tournamentId, teamId]);
+
+  const handleDeleteClick = () => {
+    setOpenDeleteDialog(true);
+  };
+
+  const handleDeleteCancel = () => {
+    setOpenDeleteDialog(false);
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      await fetcher(`/teams/${teamId}`, {
+        method: 'DELETE',
+      });
+      navigate(`/tournament/${tournamentId}`);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete team';
+      setError(errorMessage);
+    }
+    setOpenDeleteDialog(false);
+  };
 
   if (loading) {
     return (
@@ -102,15 +129,25 @@ const Team: React.FC = () => {
           <Typography variant="h4" component="h1" gutterBottom>
             {team.name || `Team #${team.id}`}
           </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<EditIcon />}
-            component={Link}
-            to={`/tournament/${tournamentId}/team/${teamId}/edit`}
-          >
-            Edit Team
-          </Button>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<EditIcon />}
+              component={Link}
+              to={`/tournament/${tournamentId}/team/${teamId}/edit`}
+            >
+              Edit Team
+            </Button>
+            <Button
+              variant="outlined"
+              color="error"
+              startIcon={<DeleteIcon />}
+              onClick={handleDeleteClick}
+            >
+              Remove Team
+            </Button>
+          </Box>
         </Box>
 
         {tournament && (
@@ -182,6 +219,24 @@ const Team: React.FC = () => {
             ))}
           </Box>
         </Box>
+
+        <Dialog
+          open={openDeleteDialog}
+          onClose={handleDeleteCancel}
+        >
+          <DialogTitle>Delete Team</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Are you sure you want to delete this team? This action cannot be undone.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleDeleteCancel}>Cancel</Button>
+            <Button onClick={handleDeleteConfirm} color="error" variant="contained">
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Paper>
     </Container>
   );
