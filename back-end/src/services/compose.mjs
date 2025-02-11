@@ -37,6 +37,25 @@ export const compose = async (team, character) => {
 };
 
 /**
+ * Removes a specific character from a team's composition
+ * @param {Object} team - The team object containing an id property
+ * @param {number} characterId - The ID of the character to remove
+ * @returns {Promise<Object>} The deleted compose entry
+ */
+export const removeCompose = async (team, characterId) => {
+  try {
+    logger.info(`Removing character ${characterId} from team ${team.id}`);
+    const result = await pool.query('DELETE FROM compose WHERE party_id = $1 AND character_id = $2 RETURNING *', [team.id, characterId]);
+    logger.info(`Character removed from team composition successfully`);
+    return result.rows[0];
+  } catch (error) {
+    logger.error(`Error removing character from team composition: ${error.message}`);
+    throw error;
+  }
+};
+
+
+/**
  * Deletes all composition entries for a specific team
  * @param {Object} team - The team object containing an id property
  * @returns {Promise<Object>} The deleted compose entry

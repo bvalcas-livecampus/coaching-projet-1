@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router';
+import { useParams, useNavigate, Link } from 'react-router';
 import {
   Container,
   Typography,
@@ -12,7 +12,7 @@ import {
   Avatar,
   Button
 } from '@mui/material';
-import { Star as StarIcon } from '@mui/icons-material';
+import { Star as StarIcon, Edit as EditIcon } from '@mui/icons-material';
 import { fetcher } from '../../api/fetcher';
 
 interface Character {
@@ -98,9 +98,20 @@ const Team: React.FC = () => {
   return (
     <Container sx={{ py: 4 }}>
       <Paper elevation={3} sx={{ p: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          {team.name || `Team #${team.id}`}
-        </Typography>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Typography variant="h4" component="h1" gutterBottom>
+            {team.name || `Team #${team.id}`}
+          </Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<EditIcon />}
+            component={Link}
+            to={`/tournament/${tournamentId}/team/${teamId}/edit`}
+          >
+            Edit Team
+          </Button>
+        </Box>
 
         {tournament && (
           <Typography variant="body1" color="text.secondary">

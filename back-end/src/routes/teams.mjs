@@ -5,8 +5,6 @@ import { teams as teamsService,
   characters as charactersService,
   compose as composeService
 } from "../services/index.mjs";
-import charactersMiddleware from "../middleware/characters.mjs";
-import teamsMiddleware from "../middleware/teams.mjs";
 import logger from '../utils/logger.mjs';
 
 const router = express.Router();
@@ -147,10 +145,10 @@ router.post('/', async (req, res, next) => {
  * @returns {Promise<Object>} Updated team object
  * @throws {Error} 404 - Team not found
  */
-router.put('/:id', charactersMiddleware, teamsMiddleware, async (req, res, next) => {
+router.put('/:id', async (req, res, next) => {
     try {
         logger.info(`Updating team with id: ${req.params.id}`);
-        const team = req.teams.find(team => team.id === req.params.id);
+        const team = await teamsService.getTeamById(req.params.id);
         if (!team) {
             logger.warn(`Team not found with id: ${req.params.id}`);
             return next({ status: 404, message: `Team with id ${req.params.id} not found` });
@@ -173,10 +171,10 @@ router.put('/:id', charactersMiddleware, teamsMiddleware, async (req, res, next)
  * @returns {Promise<Object>} Deleted team object
  * @throws {Error} 404 - Team not found
  */
-router.delete('/:id', charactersMiddleware, teamsMiddleware, async (req, res, next) => {
+router.delete('/:id', async (req, res, next) => {
     try {
         logger.info(`Deleting team with id: ${req.params.id}`);
-        const team = req.teams.find(team => team.id === req.params.id);
+        const team = await teamsService.getTeamById(req.params.id);
         if (!team) {
             logger.warn(`Team not found with id: ${req.params.id}`);
             return next({ status: 404, message: `Team with id ${req.params.id} not found` });
@@ -246,6 +244,45 @@ router.put('/:id/add-members', async (req, res, next) => {
         return res.send(updatedTeam);
     } catch (error) {
         logger.error(`Error adding members to team ${req.params.id}:`, error);
+        return next(error);
+    }
+});
+
+/**
+ * @route PUT /teams/:id/remove-member
+ * @description Remove a member from a team
+ * @param {string} req.params.id - Team ID
+ * @param {number} req.body.character_id - Character ID to remove
+ * @returns {Promise<Object>} Updated team object
+ * @throws {Error} 404 - Team not found
+ */
+router.put('/:id/remove-member', async (req, res, next) => {
+    try {
+        const { character_id } = req.body;
+        if (!character_id) {
+            logger.warn('Character ID missing in request body');
+            return next({ status: 400, message: 'Character ID is required' });
+        }
+
+        logger.info(`Removing member ${character_id} from team: ${req.params.id}`);
+        const team = await teamsService.getTeamById(req.params.id);
+        
+        if (!team) {
+            logger.warn(`Team not found with id: ${req.params.id}`);
+            return next({ status: 404, message: `Team with id ${req.params.id} not found` });
+        }
+
+        if (team.captain_id === character_id) {
+            logger.warn(`Cannot remove captain ${character_id} from team ${team.id}`);
+            return next({ status: 400, message: 'Cannot remove team captain' });
+        }
+
+        await composeService.removeCompose(team, character_id);
+        logger.info(`Team member ${character_id} removed from team ${team.id}`);
+        
+        return res.send(team);
+    } catch (error) {
+        logger.error(`Error removing member from team ${req.params.id}:`, error);
         return next(error);
     }
 });
