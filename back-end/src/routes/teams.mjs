@@ -135,6 +135,30 @@ router.post('/', async (req, res, next) => {
     }
 });
 
+// Update the helper function to include logging
+async function checkTournamentActive(team) {
+    logger.info(`Checking if tournament is active for team ${team.id}`);
+    const registered = await registeredService.getRegisteredById(team.registered_id);
+    if (!registered) {
+        logger.warn(`Team registration not found for team ${team.id}`);
+        throw { status: 404, message: 'Team registration not found' };
+    }
+    
+    const tournament = await tournamentService.getTournamentById(registered.tournament_id);
+    if (!tournament) {
+        logger.warn(`Tournament not found for registration ${registered.tournament_id}`);
+        throw { status: 404, message: 'Tournament not found' };
+    }
+
+    if (new Date(tournament.end_date) <= new Date()) {
+        logger.warn(`Tournament ${tournament.id} has ended - team ${team.id} cannot be modified`);
+        throw { status: 403, message: 'Tournament has ended - team cannot be modified' };
+    }
+    
+    logger.info(`Tournament ${tournament.id} is active for team ${team.id}`);
+    return { registered, tournament };
+}
+
 /**
  * @route PUT /teams/:id
  * @description Update a team
@@ -153,6 +177,7 @@ router.put('/:id', async (req, res, next) => {
             logger.warn(`Team not found with id: ${req.params.id}`);
             return next({ status: 404, message: `Team with id ${req.params.id} not found` });
         }
+        await checkTournamentActive(team);
         const updatedTeam = await teamsService.updateTeam(team, req.body);
         logger.info(`Team updated successfully: ${req.params.id}`);
         return res.send(updatedTeam);
@@ -179,10 +204,10 @@ router.delete('/:id', async (req, res, next) => {
             logger.warn(`Team not found with id: ${req.params.id}`);
             return next({ status: 404, message: `Team with id ${req.params.id} not found` });
         }
+
+        await checkTournamentActive(team);
+
         const deletedTeam = await teamsService.deleteTeam(team);
-        const registered = await registeredService.getRegisteredByTeam(team);
-        await registeredService.deleteRegistered(registered);
-        await composeService.deleteCompose(team);
         logger.info(`Team deleted successfully: ${req.params.id}`);
         return res.send(deletedTeam);
     } catch (error) {
@@ -214,6 +239,8 @@ router.put('/:id/add-members', async (req, res, next) => {
             logger.warn(`Team not found with id: ${req.params.id}`);
             return next({ status: 404, message: `Team with id ${req.params.id} not found` });
         }
+
+        await checkTournamentActive(team)
 
         // Get existing team members
         const existingMembers = await composeService.getTeamMembers(team.id);
@@ -271,7 +298,8 @@ router.put('/:id/remove-member', async (req, res, next) => {
             logger.warn(`Team not found with id: ${req.params.id}`);
             return next({ status: 404, message: `Team with id ${req.params.id} not found` });
         }
-
+        await checkTournamentActive(team);
+        
         if (team.captain_id === character_id) {
             logger.warn(`Cannot remove captain ${character_id} from team ${team.id}`);
             return next({ status: 400, message: 'Cannot remove team captain' });

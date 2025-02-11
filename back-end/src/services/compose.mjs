@@ -54,25 +54,6 @@ export const removeCompose = async (team, characterId) => {
   }
 };
 
-
-/**
- * Deletes all composition entries for a specific team
- * @param {Object} team - The team object containing an id property
- * @returns {Promise<Object>} The deleted compose entry
- */
-export const deleteCompose = async (team) => {
-  try {
-    logger.info(`Deleting all composition entries for team ${team.id}`);
-    const result = await pool.query('DELETE FROM compose WHERE party_id = $1 RETURNING *', [team.id]);
-    logger.info(`Composition entries deleted successfully`);
-    return result.rows[0];
-  } catch (error) {
-    logger.error(`Error deleting composition entries: ${error.message}`);
-    throw error;
-  }
-};
-
-
 /**
  * Gets all character IDs that are members of a specific team
  * @param {string|number} teamId - The team ID to get members for

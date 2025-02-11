@@ -55,6 +55,8 @@ const Team: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
+  const isTournamentActive = tournament && new Date(tournament.end_date) > new Date();
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -129,25 +131,31 @@ const Team: React.FC = () => {
           <Typography variant="h4" component="h1" gutterBottom>
             {team.name || `Team #${team.id}`}
           </Typography>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<EditIcon />}
-              component={Link}
-              to={`/tournament/${tournamentId}/team/${teamId}/edit`}
-            >
-              Edit Team
-            </Button>
-            <Button
-              variant="outlined"
-              color="error"
-              startIcon={<DeleteIcon />}
-              onClick={handleDeleteClick}
-            >
-              Remove Team
-            </Button>
-          </Box>
+          {isTournamentActive ? (
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<EditIcon />}
+                component={Link}
+                to={`/tournament/${tournamentId}/team/${teamId}/edit`}
+              >
+                Edit Team
+              </Button>
+              <Button
+                variant="outlined"
+                color="error"
+                startIcon={<DeleteIcon />}
+                onClick={handleDeleteClick}
+              >
+                Remove Team
+              </Button>
+            </Box>
+          ) : (
+            <Typography variant="body2" color="text.secondary">
+              Tournament has ended - team can no longer be modified
+            </Typography>
+          )}
         </Box>
 
         {tournament && (

@@ -20,6 +20,29 @@ export const registered = async (tournament, date) => {
     }
 };
 
+
+/**
+ * Retrieves a registration record by its ID
+ * @param {number} id - The unique identifier of the registration
+ * @returns {Promise<Object|null>} The registration record if found, null otherwise
+ */
+export const getRegisteredById = async (id) => {
+    logger.info(`Fetching registration with ID: ${id}`);
+    try {
+        const result = await pool.query('SELECT * FROM registered WHERE id = $1', [id]);
+        if (result.rows.length === 0) {
+            logger.info(`No registration found with ID: ${id}`);
+            return null;
+        }
+        logger.info(`Successfully retrieved registration with ID: ${id}`);
+        return result.rows[0];
+    } catch (error) {
+        logger.error(`Error fetching registration with ID ${id}: ${error.message}`);
+        throw error;
+    }
+};
+
+
 /**
  * Retrieves all registrations for a specific tournament
  * @param {Object} tournament - The tournament object containing tournament details
@@ -37,41 +60,3 @@ export const getRegisteredByTournament = async (tournament) => {
         throw error;
     }
 };
-
-/**
- * Retrieves all registrations for a specific team
- * @param {Object} team - The team object containing team details
- * @param {number} team.id - The unique identifier of the team
- * @returns {Promise<Array>} Array of registration records for the team
- */
-export const getRegisteredByTeam = async (team) => {
-    logger.info(`Fetching registrations for team ID: ${team.id}`);
-    try {
-        const result = await pool.query('SELECT * FROM registered WHERE team_id = $1', [team.id]);
-        logger.info(`Found ${result.rows.length} registrations for team ID: ${team.id}`);
-        return result.rows;
-    } catch (error) {
-        logger.error(`Error fetching registrations for team ID ${team.id}: ${error.message}`);
-        throw error;
-    }
-};
-
-/**
- * Deletes a registration record
- * @param {Object} registered - The registration object containing registration details
- * @param {number} registered.tournament_id - The tournament ID of the registration to delete
- * @returns {Promise<Object>} The deleted registration record
- */
-export const deleteRegistered = async (registered) => {
-    logger.info(`Deleting registration for tournament ID: ${registered.tournament_id}`);
-    try {
-        const result = await pool.query('DELETE FROM registered WHERE tournament_id = $1 RETURNING *', [registered.tournament_id]);
-        logger.info(`Successfully deleted registration for tournament ID: ${registered.tournament_id}`);
-        return result.rows[0];
-    } catch (error) {
-        logger.error(`Error deleting registration for tournament ID ${registered.tournament_id}: ${error.message}`);
-        throw error;
-    }
-};
-
-

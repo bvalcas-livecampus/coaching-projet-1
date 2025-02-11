@@ -132,17 +132,18 @@ export const updateTeam = async (team, updateTeam) => {
 
 /**
  * Deletes a team from the database
- * @param {number} id - The ID of the team to delete
+ * @param {Object} team - Current team object
+ * @param {number} team.id - The ID of the team to update
  * @returns {Promise<Object|null>} Deleted team object if found, null otherwise
  */
-export const deleteTeam = async (id) => {
+export const deleteTeam = async (team) => {
   try {
-    logger.info(`Deleting team with ID: ${id}`);
-    const result = await pool.query('DELETE FROM parties WHERE id = $1 RETURNING *', [id]);
-    logger.info(result.rows[0] ? `Team ${id} deleted successfully` : `No team found with ID ${id} to delete`);
+    logger.info(`Deleting team with ID: ${team.id}`);
+    const result = await pool.query('DELETE FROM parties WHERE id = $1 RETURNING *', [team.id]);
+    logger.info(result.rows[0] ? `Team ${team.id} deleted successfully` : `No team found with ID ${team.id} to delete`);
     return result.rows[0];
   } catch (error) {
-    logger.error(`Error deleting team ${id}:`, error);
+    logger.error(`Error deleting team ${team.id}:`, error);
     throw error;
   }
 };
