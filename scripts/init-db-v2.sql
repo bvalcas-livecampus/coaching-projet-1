@@ -64,7 +64,8 @@ CREATE TABLE tournament (
     end_date DATE NOT NULL,
     name VARCHAR(255) NOT NULL,
     cost_to_registry INT NOT NULL,
-    description VARCHAR(255) NOT NULL
+    description VARCHAR(255) NOT NULL,
+    deleted BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE registered (
