@@ -20,7 +20,7 @@ function Login() {
       });
       
       setStorageItem('token', data.token);
-      navigate('/characters');
+      navigate('/dashboard');
     } catch (error) {
       console.error('Login error:', error);
       setError('Invalid email or password. Please try again.');
