@@ -15,9 +15,11 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  DialogContentText
+  DialogContentText,
+  Tabs,
+  Tab
 } from '@mui/material';
-import { Star as StarIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { Star as StarIcon, Edit as EditIcon, Delete as DeleteIcon, People as PeopleIcon, Castle as CastleIcon } from '@mui/icons-material';
 import { fetcher } from '../../api/fetcher';
 
 interface Character {
@@ -45,6 +47,13 @@ interface Tournament {
   description: string;
 }
 
+interface DonjonDone {
+  id: number;
+  name: string;
+  timer: number;
+  completion_date: string;
+}
+
 const Team: React.FC = () => {
   const { tournamentId, teamId } = useParams<{ tournamentId: string; teamId: string }>();
   const navigate = useNavigate();
@@ -54,20 +63,24 @@ const Team: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [donjonsDone, setDonjonsDone] = useState<DonjonDone[]>([]);
+  const [activeTab, setActiveTab] = useState(0);
 
   const isTournamentActive = tournament && new Date(tournament.end_date) > new Date();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [teamData, charactersData, tournamentData] = await Promise.all([
+        const [teamData, charactersData, tournamentData, donjonsData] = await Promise.all([
           fetcher(`/teams/${teamId}`),
           fetcher(`/teams/${teamId}/characters`),
-          fetcher(`/tournament/${tournamentId}`)
+          fetcher(`/tournament/${tournamentId}`),
+          fetcher(`/donjons/team/${teamId}`)
         ]);
         setTeam(teamData);
         setCharacters(charactersData);
         setTournament(tournamentData);
+        setDonjonsDone(donjonsData);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'An error occurred';
         setError(errorMessage);
@@ -100,6 +113,10 @@ const Team: React.FC = () => {
     setOpenDeleteDialog(false);
   };
 
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue);
+  };
+
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
@@ -123,6 +140,114 @@ const Team: React.FC = () => {
       </Container>
     );
   }
+
+  const renderTeamMembers = () => (
+    <Box>
+      {characters.map((character) => (
+        <Paper
+          key={character.id}
+          sx={{
+            mb: 2,
+            p: 2,
+            transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+            '&:hover': {
+              transform: 'translateX(8px)',
+              boxShadow: 3,
+              bgcolor: 'action.hover'
+            },
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            border: character.id === team.captain_id ? 2 : 0,
+            borderColor: 'primary.main'
+          }}
+        >
+          <Avatar sx={{ bgcolor: 'primary.main' }}>
+            {character.name.charAt(0)}
+          </Avatar>
+          <Box sx={{ flexGrow: 1 }}>
+            <Typography variant="h6" component="h3">
+              {character.name}
+              {character.id === team.captain_id && (
+                <StarIcon 
+                  sx={{ 
+                    ml: 1, 
+                    color: 'primary.main',
+                    verticalAlign: 'middle'
+                  }} 
+                />
+              )}
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+              <Chip 
+                size="small" 
+                label={`iLvl ${character.ilvl}`}
+              />
+              <Chip 
+                size="small" 
+                label={`RIO ${character.rio}`}
+              />
+            </Box>
+          </Box>
+          <Button 
+            color="primary"
+            variant="contained"
+            onClick={() => navigate(`/characters/${character.id}`)}
+            sx={{ minWidth: 100 }}
+          >
+            View Details
+          </Button>
+        </Paper>
+      ))}
+    </Box>
+  );
+
+  const renderDonjonsDone = () => (
+    <Box>
+      {donjonsDone.map((donjon) => (
+        <Paper
+          key={donjon.id}
+          sx={{
+            mb: 2,
+            p: 2,
+            transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+            '&:hover': {
+              transform: 'translateX(8px)',
+              boxShadow: 3,
+              bgcolor: 'action.hover'
+            },
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2
+          }}
+        >
+          <Avatar sx={{ bgcolor: 'secondary.main' }}>
+            <CastleIcon />
+          </Avatar>
+          <Box sx={{ flexGrow: 1 }}>
+            <Typography variant="h6" component="h3">
+              {donjon.name}
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+              <Chip 
+                size="small" 
+                label={`Time: ${donjon.timer} minutes`}
+              />
+              <Chip 
+                size="small" 
+                label={new Date(donjon.completion_date).toLocaleDateString()}
+              />
+            </Box>
+          </Box>
+        </Paper>
+      ))}
+      {donjonsDone.length === 0 && (
+        <Typography variant="body1" color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
+          No dungeons completed yet
+        </Typography>
+      )}
+    </Box>
+  );
 
   return (
     <Container sx={{ py: 4 }}>
@@ -165,67 +290,40 @@ const Team: React.FC = () => {
         )}
 
         <Box sx={{ mt: 4 }}>
-          <Typography variant="h6" gutterBottom>
-            Team Members
-          </Typography>
-          <Box>
-            {characters.map((character) => (
-              <Paper
-                key={character.id}
-                sx={{
-                  mb: 2,
-                  p: 2,
-                  transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
-                  '&:hover': {
-                    transform: 'translateX(8px)',
-                    boxShadow: 3,
-                    bgcolor: 'action.hover'
-                  },
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 2,
-                  border: character.id === team.captain_id ? 2 : 0,
-                  borderColor: 'primary.main'
-                }}
-              >
-                <Avatar sx={{ bgcolor: 'primary.main' }}>
-                  {character.name.charAt(0)}
-                </Avatar>
-                <Box sx={{ flexGrow: 1 }}>
-                  <Typography variant="h6" component="h3">
-                    {character.name}
-                    {character.id === team.captain_id && (
-                      <StarIcon 
-                        sx={{ 
-                          ml: 1, 
-                          color: 'primary.main',
-                          verticalAlign: 'middle'
-                        }} 
-                      />
-                    )}
-                  </Typography>
-                  <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
-                    <Chip 
-                      size="small" 
-                      label={`iLvl ${character.ilvl}`}
-                    />
-                    <Chip 
-                      size="small" 
-                      label={`RIO ${character.rio}`}
-                    />
-                  </Box>
-                </Box>
-                <Button 
-                  color="primary"
-                  variant="contained"
-                  onClick={() => navigate(`/characters/${character.id}`)}
-                  sx={{ minWidth: 100 }}
-                >
-                  View Details
-                </Button>
-              </Paper>
-            ))}
-          </Box>
+          <Tabs
+            value={activeTab}
+            onChange={handleTabChange}
+            sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}
+          >
+            <Tab 
+              icon={<PeopleIcon />} 
+              label="Team Members" 
+              iconPosition="start"
+            />
+            <Tab 
+              icon={<CastleIcon />} 
+              label="Dungeons Completed" 
+              iconPosition="start"
+            />
+          </Tabs>
+
+          {activeTab === 0 && (
+            <>
+              <Typography variant="h6" gutterBottom>
+                Team Members
+              </Typography>
+              {renderTeamMembers()}
+            </>
+          )}
+          
+          {activeTab === 1 && (
+            <>
+              <Typography variant="h6" gutterBottom>
+                Dungeons Completed
+              </Typography>
+              {renderDonjonsDone()}
+            </>
+          )}
         </Box>
 
         <Dialog
