@@ -93,7 +93,7 @@ router.get('/:id/characters', async (req, res, next) => {
  */
 router.post('/', async (req, res, next) => {
     try {
-        const { tournament, character, team: _team } = req.body;
+        const { tournament, character, team } = req.body;
         
         logger.info(`Creating new team for tournament: ${tournament?.id}`);
         
@@ -106,12 +106,10 @@ router.post('/', async (req, res, next) => {
             logger.warn('Character object missing in team creation request'); 
             return next({ status: 400, message: 'Character object is required' });
         }
-/*
-        if (!_team) {
+        if (!team) {
             logger.warn('Team object missing in team creation request');
             return next({ status: 400, message: 'Team object is required' });
         }
-*/
 
         const tournamentExists = await tournamentService.getTournamentById(tournament.id);
         if (!tournamentExists) {
@@ -125,7 +123,7 @@ router.post('/', async (req, res, next) => {
         }
         
         const registered = await registeredService.registered(tournament, new Date());
-        const party = await teamsService.createTeam(character, registered);
+        const party = await teamsService.createTeam(character, registered, team);
         await composeService.compose(party, character);
         logger.info(`Team created successfully with id: ${party.id}`);
         return res.send(party);

@@ -96,12 +96,14 @@ export const getTeamsByCharacterIds = async (characters) => {
  * @param {number} leader.id - The ID of the leader character
  * @param {Object} registered - Registered user object
  * @param {number} registered.id - The ID of the registered user
+ * @param {Object} team - Team object
+ * @param {string} team.name - The name of the team
  * @returns {Promise<Object>} Newly created team object
  */
-export const createTeam = async (leader, registered) => {
+export const createTeam = async (leader, registered, team) => {
   try {
-    logger.info(`Creating new team with captain ID: ${leader.id} and registered user ID: ${registered.id}`);
-    const result = await pool.query('INSERT INTO parties (captain_id, registered_id) VALUES ($1, $2) RETURNING *', [leader.id, registered.id]);
+    logger.info(`Creating new team with captain ID: ${leader.id} and registered user ID: ${registered.id} and name: ${team.name}`);
+    const result = await pool.query('INSERT INTO parties (captain_id, registered_id, name) VALUES ($1, $2, $3) RETURNING *', [leader.id, registered.id, team.name]);
     logger.info(`Created new team with ID: ${result.rows[0].id}`);
     return result.rows[0];
   } catch (error) {
@@ -121,7 +123,7 @@ export const createTeam = async (leader, registered) => {
 export const updateTeam = async (team, updateTeam) => {
   try {
     logger.info(`Updating team ${team.id} with new captain ID: ${updateTeam.captain_id}`);
-    const result = await pool.query('UPDATE parties SET captain_id = $1 WHERE id = $2 RETURNING *', [updateTeam.captain_id, team.id]);
+    const result = await pool.query('UPDATE parties SET captain_id = $1, name = $2 WHERE id = $3 RETURNING *', [updateTeam.captain_id, updateTeam.name, team.id]);
     logger.info(`Team ${team.id} updated successfully`);
     return result.rows[0];
   } catch (error) {

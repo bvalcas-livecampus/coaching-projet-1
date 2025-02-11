@@ -134,7 +134,8 @@ const EditTeam: React.FC = () => {
       await fetcher(`/teams/${teamId}`, {
         method: 'PUT',
         body: JSON.stringify({
-          captain_id: characterId
+          captain_id: characterId,
+          name: team.name
         })
       });
 
