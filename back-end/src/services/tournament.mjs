@@ -2,13 +2,13 @@ import pool from './bdd.mjs';
 import logger from '../utils/logger.mjs';
 
 /**
- * Retrieves all tournaments from the database
+ * Retrieves all non-deleted tournaments from the database
  * @returns {Promise<Array>} Array of tournament objects
  */
 export const getAllTournaments = async () => {
   try {
-    logger.info('Retrieving all tournaments');
-    const result = await pool.query('SELECT id, name, start_date, end_date FROM tournament ORDER BY start_date');
+    logger.info('Retrieving all non-deleted tournaments');
+    const result = await pool.query('SELECT id, name, start_date, end_date FROM tournament WHERE deleted = false ORDER BY start_date');
     logger.info(`Retrieved ${result.rows.length} tournaments`);
     return result.rows;
   } catch (error) {
@@ -18,14 +18,14 @@ export const getAllTournaments = async () => {
 };
 
 /**
- * Retrieves a specific tournament by its ID
+ * Retrieves a specific non-deleted tournament by its ID
  * @param {number} id - The ID of the tournament to retrieve
  * @returns {Promise<Object|null>} Tournament object if found, null otherwise
  */
 export const getTournamentById = async (id) => {
   try {
     logger.info(`Retrieving tournament with id ${id}`);
-    const result = await pool.query('SELECT * FROM tournament WHERE id = $1', [id]);
+    const result = await pool.query('SELECT * FROM tournament WHERE id = $1 AND deleted = false', [id]);
     logger.info(result.rows[0] ? `Tournament ${id} found` : `Tournament ${id} not found`);
     return result.rows[0];
   } catch (error) {
