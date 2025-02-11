@@ -17,8 +17,12 @@ import { fetcher } from '../../api/fetcher';
 const CreateTournament: React.FC = () => {
   const navigate = useNavigate();
   const [name, setName] = useState('');
-  const [startDate, setStartDate] = useState<Date | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
+  const [startDate, setStartDate] = useState<Date | null>(new Date());
+  const [endDate, setEndDate] = useState<Date | null>(() => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow;
+  });
   const [costToRegistry, setCostToRegistry] = useState<number>(0);
   const [description, setDescription] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -27,8 +31,8 @@ const CreateTournament: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name || !startDate || !endDate || costToRegistry === undefined || !description) {
-      setError('Please fill in all fields');
+    if (!name.trim() || !startDate || !endDate || costToRegistry === undefined || !description.trim()) {
+      setError('All fields are required');
       return;
     }
 
@@ -81,6 +85,7 @@ const CreateTournament: React.FC = () => {
         )}
 
         <Box component="form" onSubmit={handleSubmit} noValidate>
+
           <TextField
             margin="normal"
             required
@@ -91,6 +96,8 @@ const CreateTournament: React.FC = () => {
             autoFocus
             value={name}
             onChange={(e) => setName(e.target.value)}
+            error={!name.trim() && name !== ''}
+            helperText={!name.trim() && name !== '' ? 'Tournament name is required' : ''}
           />
 
           <TextField
@@ -104,6 +111,8 @@ const CreateTournament: React.FC = () => {
             rows={4}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            error={!description.trim() && description !== ''}
+            helperText={!description.trim() && description !== '' ? 'Description is required' : ''}
           />
 
           <TextField
@@ -117,23 +126,39 @@ const CreateTournament: React.FC = () => {
             inputProps={{ min: 0 }}
             value={costToRegistry}
             onChange={(e) => setCostToRegistry(Number(e.target.value))}
+            error={costToRegistry === undefined}
+            helperText={costToRegistry === undefined ? 'Registration cost is required' : ''}
           />
 
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DatePicker
-              label="Start Date"
+              label="Start Date *"
               value={startDate}
               onChange={(newValue) => setStartDate(newValue)}
               sx={{ mt: 2, width: '100%' }}
               minDate={new Date()}
+              slotProps={{
+                textField: {
+                  required: true,
+                  error: !startDate,
+                  helperText: !startDate ? 'Start date is required' : '',
+                }
+              }}
             />
 
             <DatePicker
-              label="End Date"
+              label="End Date *"
               value={endDate}
               onChange={(newValue) => setEndDate(newValue)}
               sx={{ mt: 2, width: '100%' }}
               minDate={startDate || new Date()}
+              slotProps={{
+                textField: {
+                  required: true,
+                  error: !endDate,
+                  helperText: !endDate ? 'End date is required' : '',
+                }
+              }}
             />
           </LocalizationProvider>
 
