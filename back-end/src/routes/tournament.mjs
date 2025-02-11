@@ -108,6 +108,21 @@ router.post('/', async (req, res, next) => {
             return next({ status: 400, message: 'Missing required fields' });
         }
 
+        // Check if end date is after current date and start date
+        const endDate = new Date(end_date);
+        const startDate = new Date(start_date);
+        const now = new Date();
+
+        if (endDate < now) {
+            logger.info('POST /tournament - End date cannot be in the past');
+            return next({ status: 400, message: 'End date cannot be in the past' });
+        }
+
+        if (endDate <= startDate) {
+            logger.info('POST /tournament - End date must be after start date');
+            return next({ status: 400, message: 'End date must be after start date' });
+        }
+
         const tournament = await tournamentService.createTournament({
             name,
             start_date,
@@ -120,6 +135,93 @@ router.post('/', async (req, res, next) => {
         return res.status(201).send(tournament);
     } catch (error) {
         logger.error('POST /tournament - Error creating tournament:', error);
+        next(error);
+    }
+});
+
+/**
+ * @route PUT /tournament/:id
+ * @description Update an existing tournament
+ * @access Public
+ * @returns {Object} Updated tournament object
+ */
+router.put('/:id', async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { name, start_date, end_date, cost_to_registry, description } = req.body;
+        logger.info(`PUT /tournament/${id} - Updating tournament`);
+
+        if (!name || !start_date || !end_date || cost_to_registry === undefined || !description) {
+            return next({ status: 400, message: 'Missing required fields' });
+        }
+
+        // Get current tournament to check end date
+        const currentTournament = await tournamentService.getTournamentById(id);
+        if (!currentTournament) {
+            logger.info(`PUT /tournament/${id} - Tournament not found`);
+            return next({ status: 404, message: 'Tournament not found' });
+        }
+
+        // Check if tournament has already ended
+        const currentEndDate = new Date(currentTournament.end_date);
+        if (currentEndDate < new Date()) {
+            logger.info(`PUT /tournament/${id} - Cannot update tournament that has already ended`);
+            return next({ status: 400, message: 'Cannot update tournament that has already ended' });
+        }
+
+        // Check if new end date is after current date and start date
+        const newEndDate = new Date(end_date);
+        const newStartDate = new Date(start_date);
+        const now = new Date();
+
+        if (newEndDate < now) {
+            logger.info(`PUT /tournament/${id} - End date cannot be in the past`);
+            return next({ status: 400, message: 'End date cannot be in the past' });
+        }
+
+        if (newEndDate <= newStartDate) {
+            logger.info(`PUT /tournament/${id} - End date must be after start date`);
+            return next({ status: 400, message: 'End date must be after start date' });
+        }
+
+        const tournament = await tournamentService.updateTournament(id, {
+            name,
+            start_date,
+            end_date,
+            cost_to_registry,
+            description
+        });
+
+        logger.info(`PUT /tournament/${id} - Successfully updated tournament`);
+        return res.send(tournament);
+    } catch (error) {
+        logger.error(`PUT /tournament/${id} - Error updating tournament:`, error);
+        next(error);
+    }
+});
+
+/**
+ * @route DELETE /tournament/:id
+ * @description Delete a tournament
+ * @access Public
+ * @returns {Object} Deleted tournament object
+ */
+router.delete('/:id', async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        logger.info(`DELETE /tournament/${id} - Deleting tournament`);
+        // Check if tournament exists
+        const currentTournament = await tournamentService.getTournamentById(id);
+        if (!currentTournament) {
+            logger.info(`DELETE /tournament/${id} - Tournament not found`);
+            return next({ status: 404, message: 'Tournament not found' });
+        }
+
+        const tournament = await tournamentService.deleteTournament(id);
+        logger.info(`DELETE /tournament/${id} - Successfully deleted tournament`);
+        return res.send(tournament);
+    } catch (error) {
+        logger.error(`DELETE /tournament/${id} - Error deleting tournament:`, error);
         next(error);
     }
 });

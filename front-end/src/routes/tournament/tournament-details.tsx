@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router';
+import { useParams, Link, useNavigate } from 'react-router';
 import { format } from 'date-fns';
 import {
   Container,
@@ -10,12 +10,14 @@ import {
   Alert,
   Grid,
   Divider,
-  Card,
-  CardContent,
-  CardActions,
-  Button
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  DialogContentText
 } from '@mui/material';
-import { CalendarToday, EventAvailable } from '@mui/icons-material';
+import { CalendarToday, EventAvailable, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { fetcher } from '../../api/fetcher';
 
 interface Tournament {
@@ -48,6 +50,8 @@ const TournamentDetails: React.FC = () => {
   const [teamsLoading, setTeamsLoading] = useState(true);
   const [teamsError, setTeamsError] = useState<string | null>(null);
   const [captains, setCaptains] = useState<Record<number, Captain>>({});
+  const navigate = useNavigate();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -81,6 +85,18 @@ const TournamentDetails: React.FC = () => {
     fetchData();
   }, [tournamentId]);
 
+  const handleDelete = async () => {
+    try {
+      await fetcher(`/tournament/${tournamentId}`, {
+        method: 'DELETE',
+      });
+      navigate('/tournament');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred while deleting the tournament');
+    }
+    setDeleteDialogOpen(false);
+  };
+
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
@@ -108,9 +124,33 @@ const TournamentDetails: React.FC = () => {
   return (
     <Container sx={{ py: 4 }}>
       <Paper elevation={3} sx={{ p: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          {tournament.name || `Tournament #${tournament.id}`}
-        </Typography>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+          <Typography variant="h4" component="h1" gutterBottom>
+            {tournament.name || `Tournament #${tournament.id}`}
+          </Typography>
+          <Box>
+            {new Date(tournament.end_date) > new Date() && (
+              <Button
+                variant="contained"
+                color="primary"
+                component={Link}
+                to={`/tournament/${tournamentId}/edit`}
+                startIcon={<EditIcon />}
+                sx={{ mr: 2 }}
+              >
+                Edit Tournament
+              </Button>
+            )}
+            <Button
+              variant="contained"
+              color="error"
+              startIcon={<DeleteIcon />}
+              onClick={() => setDeleteDialogOpen(true)}
+            >
+              Delete Tournament
+            </Button>
+          </Box>
+        </Box>
         <Divider sx={{ my: 2 }} />
         
         <Grid container spacing={3}>
@@ -222,6 +262,24 @@ const TournamentDetails: React.FC = () => {
             </Box>
           </Grid>
         </Grid>
+
+        <Dialog
+          open={deleteDialogOpen}
+          onClose={() => setDeleteDialogOpen(false)}
+        >
+          <DialogTitle>Delete Tournament</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Are you sure you want to delete this tournament? This action cannot be undone.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleDelete} color="error" autoFocus>
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Paper>
     </Container>
   );

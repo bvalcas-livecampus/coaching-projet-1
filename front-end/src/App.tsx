@@ -12,6 +12,7 @@ import TournamentDetails from './routes/tournament/tournament-details';
 import Team from './routes/team/team';
 import CharacterDetails from './routes/characters/character-details';
 import CreateTournament from './routes/tournament/create-tournament';
+import EditTournament from './routes/tournament/edit-tournament';
 
 function App() {
   return (
@@ -24,13 +25,14 @@ function App() {
           <Route path="forgot-password" element={<ForgotPassword />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="characters" element={<Characters />} />
-          <Route path="characters/:id" element={<CharacterDetails />} />
-          <Route path="characters/:id/edit" element={<EditCharacter />} />
+          <Route path="characters/:characterId" element={<CharacterDetails />} />
+          <Route path="characters/:characterId/edit" element={<EditCharacter />} />
           <Route path="characters/create" element={<CreateCharacter />} />
           <Route path="tournament" element={<TournamentList />} />
           <Route path="tournament/:tournamentId" element={<TournamentDetails />} />
           <Route path="tournament/:tournamentId/team/:teamId" element={<Team />} />
           <Route path="tournament/create" element={<CreateTournament />} />
+          <Route path="tournament/:tournamentId/edit" element={<EditTournament />} />
         </Route>
       </Routes>
     </BrowserRouter>

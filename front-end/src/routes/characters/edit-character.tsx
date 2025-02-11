@@ -20,7 +20,7 @@ interface Character {
 }
 
 const EditCharacter: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { characterId } = useParams<{ characterId: string }>();
   const navigate = useNavigate();
   const [character, setCharacter] = useState<Character | null>(null);
   const [newName, setNewName] = useState('');
@@ -30,7 +30,7 @@ const EditCharacter: React.FC = () => {
   useEffect(() => {
     const fetchCharacter = async () => {
       try {
-        const data = await fetcher(`/characters/${id}`);
+        const data = await fetcher(`/characters/${characterId}`);
         setCharacter(data);
         setNewName(data.name);
       } catch (err) {
@@ -42,12 +42,12 @@ const EditCharacter: React.FC = () => {
     };
 
     fetchCharacter();
-  }, [id]);
+  }, [characterId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await fetcher(`/characters/${id}`, {
+      await fetcher(`/characters/${characterId}`, {
         method: 'PUT',
         body: JSON.stringify({ name: newName }),
       });

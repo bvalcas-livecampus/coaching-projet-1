@@ -24,13 +24,13 @@ const CharacterDetails: React.FC = () => {
   const [character, setCharacter] = useState<Character | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { id } = useParams();
+  const { characterId } = useParams();
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCharacter = async () => {
       try {
-        const data = await fetcher(`/characters/${id}`);
+        const data = await fetcher(`/characters/${characterId}`);
         setCharacter(data);
       } catch (err) {
         setError('Failed to load character details');
@@ -41,7 +41,7 @@ const CharacterDetails: React.FC = () => {
     };
 
     fetchCharacter();
-  }, [id]);
+  }, [characterId]);
 
   if (loading) {
     return (

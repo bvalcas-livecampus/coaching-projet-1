@@ -68,8 +68,11 @@ export const createTournament = async (tournament) => {
  */
 export const updateTournament = async (id, tournament) => {
   try {
-    logger.info(`Updating tournament ${id} with name: ${tournament.name}`);
-    const result = await pool.query('UPDATE tournament SET name = $1 WHERE id = $2 RETURNING *', [tournament.name, id]);
+    logger.info(`Updating tournament ${id}`);
+    const result = await pool.query(
+      'UPDATE tournament SET name = $1, start_date = $2, end_date = $3, cost_to_registry = $4, description = $5 WHERE id = $6 RETURNING *',
+      [tournament.name, tournament.start_date, tournament.end_date, tournament.cost_to_registry, tournament.description, id]
+    );
     logger.info(result.rows[0] ? `Tournament ${id} updated` : `Tournament ${id} not found`);
     return result.rows[0];
   } catch (error) {
@@ -85,9 +88,12 @@ export const updateTournament = async (id, tournament) => {
  */
 export const deleteTournament = async (id) => {
   try {
-    logger.info(`Deleting tournament ${id}`);
-    const result = await pool.query('DELETE FROM tournament WHERE id = $1 RETURNING *', [id]);
-    logger.info(result.rows[0] ? `Tournament ${id} deleted` : `Tournament ${id} not found`);
+    logger.info(`Marking tournament ${id} as deleted`);
+    const result = await pool.query(
+      'UPDATE tournament SET deleted = true WHERE id = $1 RETURNING *',
+      [id]
+    );
+    logger.info(result.rows[0] ? `Tournament ${id} marked as deleted` : `Tournament ${id} not found`);
     return result.rows[0];
   } catch (error) {
     logger.error(`Error deleting tournament ${id}: ${error.message}`);
