@@ -9,8 +9,15 @@ import {
   Box,
   Alert,
   CircularProgress,
-  Autocomplete
+  Autocomplete,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemSecondaryAction,
+  IconButton,
+  Divider
 } from '@mui/material';
+import { Add as AddIcon, Delete as DeleteIcon, Star as StarIcon } from '@mui/icons-material';
 import { fetcher } from '../../api/fetcher';
 
 interface Character {
@@ -24,6 +31,7 @@ interface Character {
 interface FormData {
   name: string;
   captain_id: number | null;
+  members: Character[];
 }
 
 const CreateTeam: React.FC = () => {
@@ -31,12 +39,14 @@ const CreateTeam: React.FC = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<FormData>({
     name: '',
-    captain_id: null
+    captain_id: null,
+    members: []
   });
   const [characters, setCharacters] = useState<Character[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedCaptain, setSelectedCaptain] = useState<Character | null>(null);
+  const [selectedMember, setSelectedMember] = useState<Character | null>(null);
 
   useEffect(() => {
     const fetchCharacters = async () => {
@@ -51,6 +61,27 @@ const CreateTeam: React.FC = () => {
     fetchCharacters();
   }, []);
 
+  const handleAddMember = () => {
+    if (selectedMember && !formData.members.some(member => member.id === selectedMember.id)) {
+      setFormData(prev => ({
+        ...prev,
+        members: [...prev.members, selectedMember]
+      }));
+      setSelectedMember(null);
+    }
+  };
+
+  const handleRemoveMember = (characterId: number) => {
+    setFormData(prev => ({
+      ...prev,
+      members: prev.members.filter(member => member.id !== characterId),
+      captain_id: prev.captain_id === characterId ? null : prev.captain_id
+    }));
+    if (selectedCaptain?.id === characterId) {
+      setSelectedCaptain(null);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -63,7 +94,7 @@ const CreateTeam: React.FC = () => {
     setError(null);
 
     try {
-      await fetcher(`/teams`, {
+      const team = await fetcher(`/teams`, {
         method: 'POST',
         body: JSON.stringify({
           tournament: {
@@ -78,6 +109,16 @@ const CreateTeam: React.FC = () => {
         })
       });
 
+      const membersToAdd = formData.members.filter(member => member.id !== formData.captain_id);
+      if (membersToAdd.length > 0) {
+        await fetcher(`/teams/${team.id}/add-members`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            members: membersToAdd.map(member => ({ id: member.id }))
+          })
+        });
+      }
+
       navigate(`/tournament/${tournamentId}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create team');
@@ -85,6 +126,10 @@ const CreateTeam: React.FC = () => {
       setLoading(false);
     }
   };
+
+  const availableCharacters = characters.filter(
+    char => !formData.members.some(member => member.id === char.id)
+  );
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
@@ -109,25 +154,76 @@ const CreateTeam: React.FC = () => {
               fullWidth
             />
 
-            <Autocomplete
-              options={characters}
-              getOptionLabel={(character) => 
-                `${character.name} (Level ${character.ilvl})`
-              }
-              value={selectedCaptain}
-              onChange={(_, newValue) => {
-                setSelectedCaptain(newValue);
-                setFormData({ ...formData, captain_id: newValue?.id || null });
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Team Captain"
-                  required
-                  error={!formData.captain_id && Boolean(error)}
-                />
-              )}
-            />
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+              <Autocomplete
+                sx={{ flexGrow: 1 }}
+                options={availableCharacters}
+                value={selectedMember}
+                onChange={(_, newValue) => setSelectedMember(newValue)}
+                getOptionLabel={(character) => 
+                  `${character.name} (Level ${character.ilvl})`
+                }
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Add Team Member"
+                  />
+                )}
+              />
+              <Button
+                variant="contained"
+                onClick={handleAddMember}
+                disabled={!selectedMember}
+                startIcon={<AddIcon />}
+              >
+                Add
+              </Button>
+            </Box>
+
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="h6" gutterBottom>
+                Team Members
+              </Typography>
+              <List>
+                {formData.members.map((member) => (
+                  <React.Fragment key={member.id}>
+                    <ListItem>
+                      <ListItemText
+                        primary={
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            {member.name}
+                            {member.id === formData.captain_id && (
+                              <StarIcon sx={{ ml: 1, color: 'primary.main' }} />
+                            )}
+                          </Box>
+                        }
+                        secondary={`Level ${member.ilvl}`}
+                      />
+                      <ListItemSecondaryAction>
+                        {member.id !== formData.captain_id && (
+                          <Button
+                            size="small"
+                            onClick={() => {
+                              setSelectedCaptain(member);
+                              setFormData(prev => ({ ...prev, captain_id: member.id }));
+                            }}
+                          >
+                            Make Captain
+                          </Button>
+                        )}
+                        <IconButton
+                          edge="end"
+                          onClick={() => handleRemoveMember(member.id)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </ListItemSecondaryAction>
+                    </ListItem>
+                    <Divider />
+                  </React.Fragment>
+                ))}
+              </List>
+            </Box>
 
             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
               <Button
@@ -139,7 +235,7 @@ const CreateTeam: React.FC = () => {
               <Button
                 type="submit"
                 variant="contained"
-                disabled={loading}
+                disabled={loading || !formData.captain_id}
                 startIcon={loading && <CircularProgress size={20} />}
               >
                 Create Team

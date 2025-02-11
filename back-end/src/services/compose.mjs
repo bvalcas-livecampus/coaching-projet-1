@@ -54,5 +54,21 @@ export const deleteCompose = async (team) => {
 };
 
 
+/**
+ * Gets all character IDs that are members of a specific team
+ * @param {string|number} teamId - The team ID to get members for
+ * @returns {Promise<Array>} Array of character IDs that are members of the team
+ */
+export const getTeamMembers = async (teamId) => {
+    try {
+        logger.info(`Getting team members for team ${teamId}`);
+        const result = await pool.query('SELECT character_id FROM compose WHERE party_id = $1', [teamId]);
+        logger.info(`Found ${result.rows.length} team members`);
+        return result.rows;
+    } catch (error) {
+        logger.error(`Error getting team members: ${error.message}`);
+        throw error;
+    }
+};
 
 

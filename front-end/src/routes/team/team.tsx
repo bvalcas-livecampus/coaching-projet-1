@@ -14,7 +14,6 @@ import {
 } from '@mui/material';
 import { Star as StarIcon } from '@mui/icons-material';
 import { fetcher } from '../../api/fetcher';
-import { format } from 'date-fns';
 
 interface Character {
   id: number;

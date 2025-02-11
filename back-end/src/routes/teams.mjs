@@ -88,6 +88,7 @@ router.get('/:id/characters', async (req, res, next) => {
  * @param {Object} req.body - Request body
  * @param {Object} req.body.tournament - Tournament object
  * @param {Object} req.body.character - Character object
+ * @param {Object} req.body.team - Team object
  * @returns {Promise<Object>} Created team object
  * @throws {Object} 400 - Tournament or character missing
  * @throws {Object} 404 - Tournament not found
@@ -126,11 +127,10 @@ router.post('/', async (req, res, next) => {
         }
         
         const registered = await registeredService.registered(tournament, new Date());
-        const team = await teamsService.createTeam(character, registered);
-        await composeService.compose(team, character);
-        
-        logger.info(`Team created successfully with id: ${team.id}`);
-        return res.send(team);
+        const party = await teamsService.createTeam(character, registered);
+        await composeService.compose(party, character);
+        logger.info(`Team created successfully with id: ${party.id}`);
+        return res.send(party);
     } catch (error) {
         logger.error('Error creating team:', error);
         return next(error);
@@ -189,6 +189,63 @@ router.delete('/:id', charactersMiddleware, teamsMiddleware, async (req, res, ne
         return res.send(deletedTeam);
     } catch (error) {
         logger.error(`Error deleting team ${req.params.id}:`, error);
+        return next(error);
+    }
+});
+
+/**
+ * @route PUT /teams/:id/add-members
+ * @description Add members to an existing team
+ * @param {string} req.params.id - Team ID
+ * @param {Array} req.body.members - Array of character IDs to add
+ * @returns {Promise<Object>} Updated team object
+ * @throws {Error} 404 - Team not found
+ */
+router.put('/:id/add-members', async (req, res, next) => {
+    try {
+        const members = req.body.members;
+        if (!members || !Array.isArray(members)) {
+            logger.warn('Invalid or missing members array in request body');
+            return next({ status: 400, message: 'Members array is required' });
+        }
+
+        logger.info(`Adding members to team with id: ${req.params.id}`);
+        const team = await teamsService.getTeamById(req.params.id);
+        
+        if (!team) {
+            logger.warn(`Team not found with id: ${req.params.id}`);
+            return next({ status: 404, message: `Team with id ${req.params.id} not found` });
+        }
+
+        // Get existing team members
+        const existingMembers = await composeService.getTeamMembers(team.id);
+        const updatedTeam = { ...team };
+
+        for (const member of members) {
+            // Validate member object has id
+            if (!member.id) {
+                logger.warn('Member object missing id');
+                continue;
+            }
+
+            // Check if member already exists in team
+            if (existingMembers.some(existing => existing.id === member.id)) {
+                logger.warn(`Member ${member.id} already exists in team ${team.id}`);
+                continue;
+            }
+
+            const teamMember = await charactersService.getCharacterById(member.id);
+            if (!teamMember) {
+                logger.warn(`Team member ${member.id} not found in team update request`);
+            } else {
+                await composeService.compose(team, teamMember);
+                logger.info(`Team member ${member.id} added to team ${team.id}`);
+            }
+        }
+
+        return res.send(updatedTeam);
+    } catch (error) {
+        logger.error(`Error adding members to team ${req.params.id}:`, error);
         return next(error);
     }
 });
