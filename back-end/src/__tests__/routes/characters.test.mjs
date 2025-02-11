@@ -19,7 +19,8 @@ jest.unstable_mockModule('../../services/index.mjs', () => ({
         getBelongTo: jest.fn(),
         belongTo: jest.fn(),
         deleteBelongTo: jest.fn()
-    }
+    },
+    players: {}
 }));
 
 

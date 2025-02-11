@@ -24,4 +24,16 @@ import * as registered from "./registered.mjs"
 /** @typedef {import('./belong_to.mjs')} BelongToService - Manages belong_to-related operations */
 import * as belongTo from "./belong_to.mjs"
 
-export { user, tournament, teams, characters, compose, registered, belongTo }
+/** @typedef {import('./players.mjs')} PlayersService - Manages player data and player-related operations */
+import * as players from "./players.mjs"
+
+export {
+    user,
+    tournament,
+    teams,
+    characters,
+    compose,
+    registered,
+    belongTo,
+    players
+}

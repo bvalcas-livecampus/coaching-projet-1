@@ -15,29 +15,40 @@ import logger from '../utils/logger.mjs';
  * @returns {void}
  */
 const verifyToken = (req, res, next) => {
-  logger.debug('Authentication middleware started');
+  try {
+    logger.debug('Authentication middleware started');
   
-  // Currently disabled path
-  if (true) {
-    logger.debug('Authentication check bypassed - middleware disabled');
-    return next();
-  }
-
-  const token = req.headers.authorization;
-  if (!token) {
-    logger.warn('Authentication failed - no token provided');
-    return next({ status: 401, message: "Unauthorized" });
-  }
-
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err) {
-      logger.warn('Authentication failed - invalid token', { error: err.message });
+    // Currently disabled path
+    if (true) {
+      logger.debug('Authentication check bypassed - middleware disabled');
+      if (req.headers.authorization) {
+        req.user = JSON.parse(req.headers.authorization);
+      } else {
+        logger.warn('Authentication failed - no user provided');
+        return next({ status: 401, message: "Unauthorized" });
+      }
+      return next();
+    }
+  
+    const token = req.headers.authorization;
+    if (!token) {
+      logger.warn('Authentication failed - no token provided');
       return next({ status: 401, message: "Unauthorized" });
     }
-    logger.debug('Authentication successful', { userId: decoded.id });
-    req.user = decoded;
-    next();
-  });
+  
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+      if (err) {
+        logger.warn('Authentication failed - invalid token', { error: err.message });
+        return next({ status: 401, message: "Unauthorized" });
+      }
+      logger.debug('Authentication successful', { userId: decoded.id });
+      req.user = decoded;
+      next();
+    });
+  } catch (error) {
+    logger.error('Authentication middleware error:', error);
+    throw error;
+  }
 };
 
 

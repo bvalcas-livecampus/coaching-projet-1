@@ -1,3 +1,4 @@
+import { getStorageItem } from '../utils/storage';
 const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
 interface FetcherOptions extends RequestInit {
@@ -8,10 +9,14 @@ interface FetcherOptions extends RequestInit {
 export const fetcher = async (endpoint: string, options: FetcherOptions = {}) => {
   const { data, method = 'GET', ...customOptions } = options;
 
+  // Get token from localStorage
+  const token = getStorageItem('token');
+
   const defaultOptions: RequestInit = {
     method,
     headers: {
       'Content-Type': 'application/json',
+      'Authorization': JSON.stringify(token),
     },
   };
 

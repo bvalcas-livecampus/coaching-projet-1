@@ -1,15 +1,30 @@
 import { useState } from 'react';
-import { TextField, Button, Container, Box, Typography } from '@mui/material';
+import { TextField, Button, Container, Box, Typography, Alert } from '@mui/material';
 import { useNavigate } from 'react-router';
+import { fetcher } from '../../api/fetcher';
+import { setStorageItem } from '../../utils/storage';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic here
-    navigate('/characters');
+    setError(null);
+    
+    try {
+      const data = await fetcher('/auth/login', {
+        method: 'POST',
+        data: { email, password },
+      });
+      
+      setStorageItem('token', data.token);
+      navigate('/characters');
+    } catch (error) {
+      console.error('Login error:', error);
+      setError('Invalid email or password. Please try again.');
+    }
   };
 
   return (
@@ -27,6 +42,11 @@ function Login() {
         </Typography>
         
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+          {error && (
+            <Alert severity="error" sx={{ mb: 2, width: '100%' }}>
+              {error}
+            </Alert>
+          )}
           <TextField
             margin="normal"
             required

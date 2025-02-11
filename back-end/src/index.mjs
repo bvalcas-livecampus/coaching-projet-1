@@ -5,7 +5,7 @@
 
 import express from 'express';
 import dotenv from 'dotenv';
-import _authRoutes from './routes/auth.mjs';
+import authRoutes from './routes/auth.mjs';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import errorHandler from './middleware/error.mjs';
@@ -55,6 +55,7 @@ app.use(session({
 const port = process.env.PORT || 3001;
 
 //app.use("/", authRoutes);
+app.use("/auth", authRoutes);
 app.use("/characters", authentification, charactersRoutes);
 app.use("/teams", authentification, teamsRoutes);
 // app.use("/users", authentification, usersRoutes);
