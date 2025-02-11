@@ -1,5 +1,5 @@
 import express from 'express';
-import { tournament as _tournamentService } from "../services/index.mjs"
+import { tournament as tournamentService } from "../services/index.mjs"
 import logger from '../utils/logger.mjs';
 
 const router = express.Router();
@@ -13,9 +13,9 @@ const router = express.Router();
 router.get('/', async (req, res, next) => {
     try {
         logger.info('GET /tournament - Fetching all tournaments');
-        const tournaments = await _tournamentService.getAllTournaments();
+        const tournaments = await tournamentService.getAllTournaments();
         logger.info('GET /tournament - Successfully retrieved tournaments');
-        return res.json(tournaments);
+        return res.send(tournaments);
     } catch (error) {
         logger.error('GET /tournament - Error fetching tournaments:', error);
         next(error);
@@ -33,15 +33,15 @@ router.get('/:id', async (req, res, next) => {
     try {
         const { id } = req.params;
         logger.info(`GET /tournament/${id} - Fetching tournament`);
-        const tournament = await _tournamentService.getTournamentById(id);
+        const tournament = await tournamentService.getTournamentById(id);
         
         if (!tournament) {
             logger.info(`GET /tournament/${id} - Tournament not found`);
-            return res.status(404).json({ error: 'Tournament not found' });
+            return next({ status: 404, message: 'Tournament not found' });
         }
 
         logger.info(`GET /tournament/${id} - Successfully retrieved tournament`);
-        return res.json(tournament);
+        return res.send(tournament);
     } catch (error) {
         logger.error(`GET /tournament/${id} - Error fetching tournament:`, error);
         next(error);

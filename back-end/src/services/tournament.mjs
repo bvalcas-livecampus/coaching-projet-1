@@ -5,10 +5,10 @@ import logger from '../utils/logger.mjs';
  * Retrieves all tournaments from the database
  * @returns {Promise<Array>} Array of tournament objects
  */
-export const getTournament = async () => {
+export const getAllTournaments = async () => {
   try {
     logger.info('Retrieving all tournaments');
-    const result = await pool.query('SELECT * FROM tournament');
+    const result = await pool.query('SELECT id, name, start_date, end_date FROM tournament ORDER BY start_date');
     logger.info(`Retrieved ${result.rows.length} tournaments`);
     return result.rows;
   } catch (error) {
@@ -43,7 +43,10 @@ export const getTournamentById = async (id) => {
 export const createTournament = async (tournament) => {
   try {
     logger.info(`Creating new tournament with name: ${tournament.name}`);
-    const result = await pool.query('INSERT INTO tournament (name) VALUES ($1) RETURNING *', [tournament.name]);
+    const result = await pool.query(
+      'INSERT INTO tournament (name, start_date, end_date) VALUES ($1, $2, $3) RETURNING *',
+      [tournament.name, tournament.start_date, tournament.end_date]
+    );
     logger.info(`Created tournament with id ${result.rows[0].id}`);
     return result.rows[0];
   } catch (error) {
