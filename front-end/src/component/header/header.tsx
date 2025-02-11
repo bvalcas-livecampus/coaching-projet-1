@@ -10,8 +10,11 @@ const Header = () => {
             WoW Tournament
           </Typography>
           <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button color="inherit" component={Link} to="/dashboard">
+              Dashboard
+            </Button>
             <Button color="inherit" component={Link} to="/">
-              Home
+              Disconnect
             </Button>
           </Box>
         </Toolbar>
