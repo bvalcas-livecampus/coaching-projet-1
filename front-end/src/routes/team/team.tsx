@@ -17,9 +17,21 @@ import {
   DialogActions,
   DialogContentText,
   Tabs,
-  Tab
+  Tab,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material';
-import { Star as StarIcon, Edit as EditIcon, Delete as DeleteIcon, People as PeopleIcon, Castle as CastleIcon } from '@mui/icons-material';
+import { Star as StarIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  People as PeopleIcon,
+  Castle as CastleIcon,
+  Add as AddIcon,
+  CheckCircle as CheckCircleIcon
+} from '@mui/icons-material';
 import { fetcher } from '../../api/fetcher';
 
 interface Character {
@@ -51,7 +63,12 @@ interface DonjonDone {
   id: number;
   name: string;
   timer: number;
-  completion_date: string;
+  completion_time: number;
+}
+
+interface Donjon {
+  id: number;
+  name: string;
 }
 
 const Team: React.FC = () => {
@@ -65,22 +82,28 @@ const Team: React.FC = () => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [donjonsDone, setDonjonsDone] = useState<DonjonDone[]>([]);
   const [activeTab, setActiveTab] = useState(0);
+  const [openAddDonjonDialog, setOpenAddDonjonDialog] = useState(false);
+  const [availableDonjons, setAvailableDonjons] = useState<Donjon[]>([]);
+  const [selectedDonjon, setSelectedDonjon] = useState<string>('');
+  const [timer, setTimer] = useState<string>('');
 
   const isTournamentActive = tournament && new Date(tournament.end_date) > new Date();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [teamData, charactersData, tournamentData, donjonsData] = await Promise.all([
+        const [teamData, charactersData, tournamentData, donjonsData, allDonjons] = await Promise.all([
           fetcher(`/teams/${teamId}`),
           fetcher(`/teams/${teamId}/characters`),
           fetcher(`/tournament/${tournamentId}`),
-          fetcher(`/donjons/team/${teamId}`)
+          fetcher(`/donjons/team/${teamId}`),
+          fetcher('/donjons')
         ]);
         setTeam(teamData);
         setCharacters(charactersData);
         setTournament(tournamentData);
         setDonjonsDone(donjonsData);
+        setAvailableDonjons(allDonjons);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'An error occurred';
         setError(errorMessage);
@@ -115,6 +138,39 @@ const Team: React.FC = () => {
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
+  };
+
+  const handleAddDonjonClick = () => {
+    setOpenAddDonjonDialog(true);
+  };
+
+  const handleAddDonjonClose = () => {
+    setOpenAddDonjonDialog(false);
+    setSelectedDonjon('');
+    setTimer('');
+  };
+
+  const handleAddDonjonSubmit = async () => {
+    try {
+      await fetcher(`/donjons/${selectedDonjon}/complete`, {
+        method: 'POST',
+        body: JSON.stringify({
+          team: { id: team?.id },
+          donjon: { id: selectedDonjon, timer: Number(timer) }
+        }),
+      });
+      
+      const newDonjon = await fetcher(`/donjons/${selectedDonjon}`);
+      setDonjonsDone([...donjonsDone, { 
+        ...newDonjon,
+        completion_time: Number(timer)
+      }]);
+      
+      handleAddDonjonClose();
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to add dungeon';
+      setError(errorMessage);
+    }
   };
 
   if (loading) {
@@ -201,9 +257,19 @@ const Team: React.FC = () => {
       ))}
     </Box>
   );
-
   const renderDonjonsDone = () => (
     <Box>
+      {isTournamentActive && (
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<AddIcon />}
+          onClick={handleAddDonjonClick}
+          sx={{ mb: 2 }}
+        >
+          Add Dungeon Run
+        </Button>
+      )}
       {donjonsDone.map((donjon) => (
         <Paper
           key={donjon.id}
@@ -227,6 +293,15 @@ const Team: React.FC = () => {
           <Box sx={{ flexGrow: 1 }}>
             <Typography variant="h6" component="h3">
               {donjon.name}
+              {donjon.completion_time < donjon.timer && (
+                <CheckCircleIcon 
+                  sx={{ 
+                    ml: 1,
+                    color: 'success.main',
+                    verticalAlign: 'middle'
+                  }}
+                />
+              )}
             </Typography>
             <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
               <Chip 
@@ -235,7 +310,7 @@ const Team: React.FC = () => {
               />
               <Chip 
                 size="small" 
-                label={new Date(donjon.completion_date).toLocaleDateString()}
+                label={`Completion Time: ${donjon.completion_time} minutes`}
               />
             </Box>
           </Box>
@@ -340,6 +415,45 @@ const Team: React.FC = () => {
             <Button onClick={handleDeleteCancel}>Cancel</Button>
             <Button onClick={handleDeleteConfirm} color="error" variant="contained">
               Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        <Dialog open={openAddDonjonDialog} onClose={handleAddDonjonClose}>
+          <DialogTitle>Add Dungeon Run</DialogTitle>
+          <DialogContent>
+            <Box sx={{ mt: 2 }}>
+              <FormControl fullWidth sx={{ mb: 2 }}>
+                <InputLabel>Dungeon</InputLabel>
+                <Select
+                  value={selectedDonjon}
+                  onChange={(e) => setSelectedDonjon(e.target.value)}
+                  label="Dungeon"
+                >
+                  {availableDonjons.map((donjon) => (
+                    <MenuItem key={donjon.id} value={donjon.id}>
+                      {donjon.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <TextField
+                fullWidth
+                label="Time (minutes)"
+                type="number"
+                value={timer}
+                onChange={(e) => setTimer(e.target.value)}
+              />
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleAddDonjonClose}>Cancel</Button>
+            <Button 
+              onClick={handleAddDonjonSubmit}
+              disabled={!selectedDonjon || !timer}
+              variant="contained"
+            >
+              Add
             </Button>
           </DialogActions>
         </Dialog>

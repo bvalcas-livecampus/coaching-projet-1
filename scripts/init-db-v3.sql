@@ -102,13 +102,12 @@ CREATE TABLE donjons (
 );
 
 CREATE TABLE donjon_done (
-    id SERIAL,
+    id SERIAL PRIMARY KEY,
     party_id INT NOT NULL REFERENCES parties(id),
     donjon_id INT NOT NULL REFERENCES donjons(id),
     timer INT NOT NULL,
     FOREIGN KEY (party_id) REFERENCES parties(id),
-    FOREIGN KEY (donjon_id) REFERENCES donjons(id),
-    PRIMARY KEY (party_id, donjon_id)
+    FOREIGN KEY (donjon_id) REFERENCES donjons(id)
 );
 
 TRUNCATE TABLE role CASCADE;

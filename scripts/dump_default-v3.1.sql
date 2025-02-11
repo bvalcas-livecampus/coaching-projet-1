@@ -634,6 +634,10 @@ COPY public.compose (id, character_id, party_id) FROM stdin;
 9	4	4
 10	5	4
 11	5	5
+12	1	6
+13	2	6
+14	3	7
+15	4	7
 \.
 
 
@@ -671,6 +675,8 @@ COPY public.parties (id, captain_id, registered_id, name, deleted) FROM stdin;
 3	3	3	Shadow Raiders	f
 4	4	4	Nature's Guardians	f
 5	5	5	Arrow Squad	f
+6	1	8	Thunderfury's Team	f
+7	3	9	Shadowstrike's Team	f
 \.
 
 
@@ -699,6 +705,8 @@ COPY public.registered (id, registration_date, tournament_id) FROM stdin;
 5	2024-08-15 11:00:00	3
 6	2024-12-01 08:30:00	4
 7	2024-12-15 16:15:00	4
+8	2025-02-11 19:24:57.459	5
+9	2025-02-11 19:25:32.475	5
 \.
 
 
@@ -721,7 +729,8 @@ COPY public.tournament (id, start_date, end_date, name, cost_to_registry, descri
 1	2024-04-01	2024-04-03	Spring Championship	50	A 3-day competitive tournament featuring the best teams of the season	f
 2	2024-06-15	2024-06-16	Summer Weekend Clash	25	An intense weekend of mythic dungeon racing	f
 3	2024-08-30	2024-09-02	Labor Day Marathon	75	Extended holiday weekend tournament with increased prize pool	f
-4	2024-12-27	2024-12-31	New Year's Challenge	100	End the year with the most prestigious tournament of the season	f
+5	2025-12-02	2026-01-02	New Year's Challenge	25	End the year with the most prestigious tournament of the season	f
+4	2024-12-27	2024-12-31	New Year's Challenge	100	End the year with the most prestigious tournament of the season	t
 \.
 
 
@@ -757,7 +766,7 @@ SELECT pg_catalog.setval('public.class_id_seq', 13, true);
 -- Name: compose_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.compose_id_seq', 11, true);
+SELECT pg_catalog.setval('public.compose_id_seq', 15, true);
 
 
 --
@@ -778,7 +787,7 @@ SELECT pg_catalog.setval('public.donjons_id_seq', 8, true);
 -- Name: parties_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.parties_id_seq', 5, true);
+SELECT pg_catalog.setval('public.parties_id_seq', 7, true);
 
 
 --
@@ -792,7 +801,7 @@ SELECT pg_catalog.setval('public.players_id_seq', 5, true);
 -- Name: registered_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.registered_id_seq', 7, true);
+SELECT pg_catalog.setval('public.registered_id_seq', 9, true);
 
 
 --
@@ -806,7 +815,7 @@ SELECT pg_catalog.setval('public.role_id_seq', 3, true);
 -- Name: tournament_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.tournament_id_seq', 4, true);
+SELECT pg_catalog.setval('public.tournament_id_seq', 5, true);
 
 
 --

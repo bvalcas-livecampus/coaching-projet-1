@@ -77,8 +77,20 @@ router.get('/level/:level', async (req, res, next) => {
 router.get('/team/:teamId', async (req, res, next) => {
     try {
         logger.info(`Getting dungeons completed by team: ${req.params.teamId}`);
-        const donjons = await donjonsService.getDonjonsByTeam({ id: req.params.teamId });
-        return res.send(donjons);
+        
+        const donjonsDone = await donjonsDoneService.getDonjonsDoneByTeam({ id: req.params.teamId });
+        const donjonsIds = donjonsDone.map(donjon => donjon.donjon_id);
+        
+        const donjons = await donjonsService.getDonjonsByIds(donjonsIds);
+        const donjonsWithCompletionTime = donjons.map(donjon => {
+            const completion = donjonsDone.find(done => done.donjon_id === donjon.id);
+            return {
+                ...donjon,
+                completion_time: completion ? completion.timer : null
+            };
+        });
+        
+        return res.send(donjonsWithCompletionTime);
     } catch (error) {
         logger.error(`Error getting dungeons for team ${req.params.teamId}:`, error);
         return next(error);
@@ -90,45 +102,38 @@ router.get('/team/:teamId', async (req, res, next) => {
  * @description Record a dungeon completion for a team
  * @param {string} req.params.id - Dungeon ID
  * @param {Object} req.body - Request body
- * @param {number} req.body.teamId - Team ID
- * @param {number} req.body.timer - Completion time in minutes
+ * @param {Object} req.body.team - Team object
+ * @param {number} req.body.team.id - Team ID
+ * @param {Object} req.body.donjon - Dungeon object
+ * @param {number} req.body.donjon.timer - Completion time in minutes
  * @returns {Promise<Object>} Created dungeon completion record
  * @throws {Error} 404 - Dungeon not found
  * @throws {Error} 400 - Invalid request body
  */
 router.post('/:id/complete', async (req, res, next) => {
     try {
-        const { teamId, timer } = req.body;
+        const { team, donjon: donjon_tmp } = req.body;
         
-        if (!teamId || !timer) {
+        if (!team || !donjon_tmp) {
             logger.warn('Missing required fields in request body');
-            return next({ status: 400, message: 'Team ID and timer are required' });
+            return next({ status: 400, message: 'Team and timer are required' });
         }
-
-        logger.info(`Checking if dungeon ${req.params.id} exists`);
-        const donjon = await donjonsService.getDonjonById(req.params.id);
-        if (!donjon) {
-            logger.warn(`Dungeon not found with id: ${req.params.id}`);
+        const donjon = Object.assign(donjon_tmp, { id: req.params.id });
+        
+        logger.info(`Checking if dungeon ${donjon.id} exists`);
+        const donjonExists = await donjonsService.getDonjonById(donjon.id);
+        if (!donjonExists) {
+            logger.warn(`Dungeon not found with id: ${donjon.id}`);
             return next({ status: 404, message: 'Dungeon not found' });
         }
 
-        // Check if the team has already completed this dungeon
-        const existingRecord = await donjonsDoneService.getDonjonDoneByTeamAndDonjonId(
-            { id: teamId },
-            { id: req.params.id }
-        );
-
+        const existingRecord = await donjonsDoneService.getDonjonDoneByTeamAndDonjonId(team, donjon);
         if (existingRecord) {
-            logger.warn(`Team ${teamId} has already completed dungeon ${req.params.id}`);
-            return next({ status: 400, message: 'Team has already completed this dungeon' });
+            logger.info(`Team ${team.id} has already completed dungeon ${donjon.id} ${existingRecord.length} time(s)`);
         }
 
-        logger.info(`Recording completion for dungeon ${req.params.id} by team ${teamId}`);
-        const completion = await donjonsDoneService.createDonjonDone(
-            { id: teamId },
-            { id: req.params.id },
-            timer
-        );
+        logger.info(`Recording completion for dungeon ${donjon.id} by team ${team.id}`);
+        const completion = await donjonsDoneService.createDonjonDone(team, donjon);
 
         return res.status(201).send(completion);
     } catch (error) {

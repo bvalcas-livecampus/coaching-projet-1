@@ -23,7 +23,7 @@ export const getDonjonsDone = async () => {
  * @param {number} team.id - The ID of the team
  * @param {Object} donjon - Dungeon object containing an id property
  * @param {number} donjon.id - The ID of the dungeon
- * @returns {Promise<Object|null>} Completed dungeon record if found, null otherwise
+ * @returns {Promise<Object[]>} Array of completed dungeon records
  */
 export const getDonjonDoneByTeamAndDonjonId = async (team, donjon) => {
   try {
@@ -32,8 +32,8 @@ export const getDonjonDoneByTeamAndDonjonId = async (team, donjon) => {
       'SELECT * FROM donjon_done WHERE party_id = $1 AND donjon_id = $2',
       [team.id, donjon.id]
     );
-    logger.info(result.rows[0] ? 'Record found' : 'No record found');
-    return result.rows[0];
+    logger.info(`Found ${result.rows.length} records`);
+    return result.rows;
   } catch (error) {
     logger.error('Error retrieving completed dungeon record:', error);
     throw error;
@@ -46,15 +46,15 @@ export const getDonjonDoneByTeamAndDonjonId = async (team, donjon) => {
  * @param {number} team.id - The ID of the team
  * @param {Object} donjon - Dungeon object containing an id property
  * @param {number} donjon.id - The ID of the dungeon
- * @param {number} timer - The completion time in minutes
+ * @param {number} donjon.timer - The completion time in minutes
  * @returns {Promise<Object>} Newly created completed dungeon record
  */
-export const createDonjonDone = async (team, donjon, timer) => {
+export const createDonjonDone = async (team, donjon) => {
   try {
     logger.info(`Creating completed dungeon record for team ${team.id} and dungeon ${donjon.id}`);
     const result = await pool.query(
       'INSERT INTO donjon_done (party_id, donjon_id, timer) VALUES ($1, $2, $3) RETURNING *',
-      [team.id, donjon.id, timer]
+      [team.id, donjon.id, donjon.timer]
     );
     logger.info('Created new completed dungeon record');
     return result.rows[0];
