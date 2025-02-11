@@ -104,7 +104,7 @@ const EditCharacter: React.FC = () => {
             </Button>
             <Button
               variant="outlined"
-              onClick={() => navigate('/characters')}
+              onClick={() => navigate(-1)}
             >
               Cancel
             </Button>

@@ -9,7 +9,11 @@ import {
   CircularProgress,
   Alert,
   Grid,
-  Divider
+  Divider,
+  Card,
+  CardContent,
+  CardActions,
+  Button
 } from '@mui/material';
 import { CalendarToday, EventAvailable } from '@mui/icons-material';
 import { fetcher } from '../../api/fetcher';
@@ -174,35 +178,46 @@ const TournamentDetails: React.FC = () => {
               ) : teams.length === 0 ? (
                 <Typography color="text.secondary">No teams registered yet</Typography>
               ) : (
-                <Grid container spacing={2}>
+                <Box>
                   {teams.map((team) => (
-                    <Grid item xs={12} sm={6} md={4} key={team.id}>
-                      <Link 
-                        to={`/tournament/${tournamentId}/team/${team.id}`} 
-                        style={{ textDecoration: 'none' }}
-                      >
-                        <Paper 
-                          sx={{ 
-                            p: 2,
-                            '&:hover': {
-                              backgroundColor: 'action.hover',
-                              cursor: 'pointer'
-                            }
-                          }}
-                        >
-                          <Typography variant="subtitle1">
-                            Team: {team.name || `Team #${team.id}`}
+                    <Paper
+                      key={team.id}
+                      sx={{
+                        mb: 2,
+                        p: 2,
+                        transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+                        '&:hover': {
+                          transform: 'translateX(8px)',
+                          boxShadow: 3,
+                          bgcolor: 'action.hover'
+                        },
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                      }}
+                    >
+                      <Box>
+                        <Typography variant="h6" component="h3">
+                          {team.name || `Team #${team.id}`}
+                        </Typography>
+                        {captains[team.captain_id] && (
+                          <Typography variant="body2" color="text.secondary">
+                            Captain: {captains[team.captain_id].name}
                           </Typography>
-                          {captains[team.captain_id] && (
-                            <Typography variant="body2" color="text.secondary">
-                              Captain: {captains[team.captain_id].name}
-                            </Typography>
-                          )}
-                        </Paper>
-                      </Link>
-                    </Grid>
+                        )}
+                      </Box>
+                      <Button 
+                        color="primary"
+                        variant="contained"
+                        component={Link}
+                        to={`/tournament/${tournamentId}/team/${team.id}`}
+                        sx={{ minWidth: 100 }}
+                      >
+                        View Team
+                      </Button>
+                    </Paper>
                   ))}
-                </Grid>
+                </Box>
               )}
             </Box>
           </Grid>

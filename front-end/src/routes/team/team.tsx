@@ -9,7 +9,8 @@ import {
   Alert,
   Grid,
   Chip,
-  Avatar
+  Avatar,
+  Button
 } from '@mui/material';
 import { Star as StarIcon } from '@mui/icons-material';
 import { fetcher } from '../../api/fetcher';
@@ -112,54 +113,64 @@ const Team: React.FC = () => {
           <Typography variant="h6" gutterBottom>
             Team Members
           </Typography>
-          <Grid container spacing={2}>
+          <Box>
             {characters.map((character) => (
-              <Grid item xs={12} sm={6} md={4} key={character.id}>
-                <Paper 
-                  sx={{ 
-                    p: 2,
-                    border: character.id === team.captain_id ? 2 : 0,
-                    borderColor: 'primary.main',
-                    cursor: 'pointer',
-                    '&:hover': {
-                      bgcolor: 'action.hover'
-                    }
-                  }}
-                  onClick={() => navigate(`/characters/${character.id}`)}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Avatar sx={{ bgcolor: 'primary.main' }}>
-                      {character.name.charAt(0)}
-                    </Avatar>
-                    <Box sx={{ flexGrow: 1 }}>
-                      <Typography variant="subtitle1">
-                        {character.name}
-                        {character.id === team.captain_id && (
-                          <StarIcon 
-                            sx={{ 
-                              ml: 1, 
-                              color: 'primary.main',
-                              verticalAlign: 'middle'
-                            }} 
-                          />
-                        )}
-                      </Typography>
-                      <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
-                        <Chip 
-                          size="small" 
-                          label={`iLvl ${character.ilvl}`}
-                        />
-                        <Chip 
-                          size="small" 
-                          label={`RIO ${character.rio}`}
-                        />
-                      </Box>
-                    </Box>
+              <Paper
+                key={character.id}
+                sx={{
+                  mb: 2,
+                  p: 2,
+                  transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+                  '&:hover': {
+                    transform: 'translateX(8px)',
+                    boxShadow: 3,
+                    bgcolor: 'action.hover'
+                  },
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  border: character.id === team.captain_id ? 2 : 0,
+                  borderColor: 'primary.main'
+                }}
+              >
+                <Avatar sx={{ bgcolor: 'primary.main' }}>
+                  {character.name.charAt(0)}
+                </Avatar>
+                <Box sx={{ flexGrow: 1 }}>
+                  <Typography variant="h6" component="h3">
+                    {character.name}
+                    {character.id === team.captain_id && (
+                      <StarIcon 
+                        sx={{ 
+                          ml: 1, 
+                          color: 'primary.main',
+                          verticalAlign: 'middle'
+                        }} 
+                      />
+                    )}
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+                    <Chip 
+                      size="small" 
+                      label={`iLvl ${character.ilvl}`}
+                    />
+                    <Chip 
+                      size="small" 
+                      label={`RIO ${character.rio}`}
+                    />
                   </Box>
-                </Paper>
-              </Grid>
+                </Box>
+                <Button 
+                  color="primary"
+                  variant="contained"
+                  onClick={() => navigate(`/characters/${character.id}`)}
+                  sx={{ minWidth: 100 }}
+                >
+                  View Details
+                </Button>
+              </Paper>
             ))}
-          </Grid>
+          </Box>
         </Box>
       </Paper>
     </Container>
