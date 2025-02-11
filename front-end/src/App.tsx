@@ -13,6 +13,7 @@ import Team from './routes/team/team';
 import CharacterDetails from './routes/characters/character-details';
 import CreateTournament from './routes/tournament/create-tournament';
 import EditTournament from './routes/tournament/edit-tournament';
+import CreateTeam from './routes/team/create-team';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           <Route path="tournament" element={<TournamentList />} />
           <Route path="tournament/:tournamentId" element={<TournamentDetails />} />
           <Route path="tournament/:tournamentId/team/:teamId" element={<Team />} />
+          <Route path="tournament/:tournamentId/team/create" element={<CreateTeam />} />
           <Route path="tournament/create" element={<CreateTournament />} />
           <Route path="tournament/:tournamentId/edit" element={<EditTournament />} />
         </Route>

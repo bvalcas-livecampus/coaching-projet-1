@@ -59,7 +59,7 @@ export const getCharactersByIds = async (ids) => {
 export const getCharactersByUserId = async (userId) => {
   try {
     logger.info(`Retrieving characters for user ID: ${userId}`);
-    const result = await pool.query('SELECT * FROM characters WHERE player_id = $1', [userId]);
+    const result = await pool.query('SELECT * FROM characters WHERE id = $1', [userId]);
     logger.info(`Retrieved ${result.rows.length} characters for user ${userId}`);
     return result.rows;
   } catch (error) {

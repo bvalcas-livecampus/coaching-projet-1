@@ -86,27 +86,49 @@ router.get('/:id/characters', async (req, res, next) => {
  * @route POST /teams
  * @description Create a new team for a tournament
  * @param {Object} req.body - Request body
- * @param {string} req.body.tournament_id - Tournament ID
- * @param {Array} req.characters - Array of characters (added by charactersMiddleware)
+ * @param {Object} req.body.tournament - Tournament object
+ * @param {Object} req.body.character - Character object
  * @returns {Promise<Object>} Created team object
- * @throws {Object} 400 - Tournament ID is required
+ * @throws {Object} 400 - Tournament or character missing
  * @throws {Object} 404 - Tournament not found
  */
-router.post('/', charactersMiddleware, async (req, res, next) => {
+router.post('/', async (req, res, next) => {
     try {
-        logger.info(`Creating new team for tournament: ${req.body.tournament_id}`);
-        if (!req.body.tournament_id) {
-            logger.warn('Tournament ID missing in team creation request');
-            return next({ status: 400, message: 'Tournament ID is required' });
-        }
-        const tournament = await tournamentService.getTournamentById(req.body.tournament_id);
+        const { tournament, character, team: _team } = req.body;
+        
+        logger.info(`Creating new team for tournament: ${tournament?.id}`);
+        
         if (!tournament) {
-            logger.warn(`Tournament not found with id: ${req.body.tournament_id}`);
+            logger.warn('Tournament object missing in team creation request');
+            return next({ status: 400, message: 'Tournament object is required' });
+        }
+
+        if (!character) {
+            logger.warn('Character object missing in team creation request'); 
+            return next({ status: 400, message: 'Character object is required' });
+        }
+/*
+        if (!_team) {
+            logger.warn('Team object missing in team creation request');
+            return next({ status: 400, message: 'Team object is required' });
+        }
+*/
+
+        const tournamentExists = await tournamentService.getTournamentById(tournament.id);
+        if (!tournamentExists) {
+            logger.warn(`Tournament not found with id: ${tournament.id}`);
             return next({ status: 404, message: 'Tournament not found' });
         }
+        const characterExists = await charactersService.getCharacterById(character.id);
+        if (!characterExists) {
+            logger.warn(`Character not found with id: ${character.id}`);
+            return next({ status: 404, message: 'Character not found' });
+        }
+        
         const registered = await registeredService.registered(tournament, new Date());
-        const team = await teamsService.createTeam(req.characters, registered);
-        await composeService.compose(team, req.characters);
+        const team = await teamsService.createTeam(character, registered);
+        await composeService.compose(team, character);
+        
         logger.info(`Team created successfully with id: ${team.id}`);
         return res.send(team);
     } catch (error) {

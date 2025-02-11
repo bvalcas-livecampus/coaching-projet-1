@@ -22,7 +22,7 @@ const verifyToken = (req, res, next) => {
     if (true) {
       logger.debug('Authentication check bypassed - middleware disabled');
       if (req.headers.authorization) {
-        req.user = JSON.parse(req.headers.authorization);
+        req.user = JSON.parse(req.headers.authorization)?.user;
       } else {
         logger.warn('Authentication failed - no user provided');
         return next({ status: 401, message: "Unauthorized" });

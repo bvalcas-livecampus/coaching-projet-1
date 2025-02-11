@@ -17,7 +17,7 @@ import {
   DialogActions,
   DialogContentText
 } from '@mui/material';
-import { CalendarToday, EventAvailable, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { CalendarToday, EventAvailable, Edit as EditIcon, Delete as DeleteIcon, GroupAdd as GroupAddIcon } from '@mui/icons-material';
 import { fetcher } from '../../api/fetcher';
 
 interface Tournament {
@@ -130,16 +130,28 @@ const TournamentDetails: React.FC = () => {
           </Typography>
           <Box>
             {new Date(tournament.end_date) > new Date() && (
-              <Button
-                variant="contained"
-                color="primary"
-                component={Link}
-                to={`/tournament/${tournamentId}/edit`}
-                startIcon={<EditIcon />}
-                sx={{ mr: 2 }}
-              >
-                Edit Tournament
-              </Button>
+              <>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  component={Link}
+                  to={`/tournament/${tournamentId}/team/create`}
+                  startIcon={<GroupAddIcon />}
+                  sx={{ mr: 2 }}
+                >
+                  Create Team
+                </Button>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  component={Link}
+                  to={`/tournament/${tournamentId}/edit`}
+                  startIcon={<EditIcon />}
+                  sx={{ mr: 2 }}
+                >
+                  Edit Tournament
+                </Button>
+              </>
             )}
             <Button
               variant="contained"
