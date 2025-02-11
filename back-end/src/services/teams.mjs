@@ -8,7 +8,7 @@ import logger from '../utils/logger.mjs';
 export const getTeams = async () => {
   try {
     logger.info('Retrieving all teams');
-    const result = await pool.query('SELECT * FROM parties');
+    const result = await pool.query('SELECT * FROM parties WHERE deleted = FALSE');
     logger.info(`Retrieved ${result.rows.length} teams`);
     return result.rows;
   } catch (error) {
@@ -25,7 +25,7 @@ export const getTeams = async () => {
 export const getTeamById = async (id) => {
   try {
     logger.info(`Retrieving team with ID: ${id}`);
-    const result = await pool.query('SELECT * FROM parties WHERE id = $1', [id]);
+    const result = await pool.query('SELECT * FROM parties WHERE id = $1 AND deleted = FALSE', [id]);
     logger.info(result.rows[0] ? `Team ${id} found` : `No team found with ID ${id}`);
     return result.rows[0];
   } catch (error) {
@@ -43,7 +43,7 @@ export const getTeamById = async (id) => {
 export const getTeamByRegisteredId = async (registered) => {
   try {
     logger.info(`Retrieving team for registered ID: ${registered.id}`);
-    const result = await pool.query('SELECT * FROM parties WHERE registered_id = $1', [registered.id]);
+    const result = await pool.query('SELECT * FROM parties WHERE registered_id = $1 AND deleted = FALSE', [registered.id]);
     logger.info(result.rows[0] ? `Team found for registered ID ${registered.id}` : `No team found for registered ID ${registered.id}`);
     return result.rows[0];
   } catch (error) {
@@ -62,7 +62,7 @@ export const getTeamByRegisteredId = async (registered) => {
 export const getTeamsByCaptainId = async (character) => {
   try {
     logger.info(`Retrieving teams for captain ID: ${character.id}`);
-    const result = await pool.query('SELECT * FROM parties WHERE captain_id = $1', [character.id]);
+    const result = await pool.query('SELECT * FROM parties WHERE captain_id = $1 AND deleted = FALSE', [character.id]);
     logger.info(`Found ${result.rows.length} teams for captain ${character.id}`);
     return result.rows;
   } catch (error) {
@@ -81,7 +81,7 @@ export const getTeamsByCharacterIds = async (characters) => {
   try {
     const characterIds = characters.map(character => character.id);
     logger.info(`Retrieving teams for captain IDs: ${characterIds.join(', ')}`);
-    const result = await pool.query('SELECT * FROM parties WHERE captain_id = ANY($1)', [characterIds]);
+    const result = await pool.query('SELECT * FROM parties WHERE captain_id = ANY($1) AND deleted = FALSE', [characterIds]);
     logger.info(`Found ${result.rows.length} teams for the specified captains`);
     return result.rows;
   } catch (error) {
@@ -138,8 +138,11 @@ export const updateTeam = async (team, updateTeam) => {
  */
 export const deleteTeam = async (team) => {
   try {
-    logger.info(`Deleting team with ID: ${team.id}`);
-    const result = await pool.query('DELETE FROM parties WHERE id = $1 RETURNING *', [team.id]);
+    logger.info(`Soft deleting team with ID: ${team.id}`);
+    const result = await pool.query(
+      'UPDATE parties SET deleted = TRUE WHERE id = $1 AND deleted = FALSE RETURNING *',
+      [team.id]
+    );
     logger.info(result.rows[0] ? `Team ${team.id} deleted successfully` : `No team found with ID ${team.id} to delete`);
     return result.rows[0];
   } catch (error) {

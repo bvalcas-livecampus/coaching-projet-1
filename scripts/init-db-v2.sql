@@ -80,7 +80,8 @@ CREATE TABLE parties (
     captain_id INT NOT NULL REFERENCES characters(id),
     registered_id INT NOT NULL REFERENCES registered(id),
     FOREIGN KEY (captain_id) REFERENCES characters(id),
-    FOREIGN KEY (registered_id) REFERENCES registered(id)
+    FOREIGN KEY (registered_id) REFERENCES registered(id),
+    deleted BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE compose (

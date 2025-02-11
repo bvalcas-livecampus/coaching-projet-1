@@ -280,7 +280,8 @@ ALTER SEQUENCE public.donjons_id_seq OWNED BY public.donjons.id;
 CREATE TABLE public.parties (
     id integer NOT NULL,
     captain_id integer NOT NULL,
-    registered_id integer NOT NULL
+    registered_id integer NOT NULL,
+    deleted boolean DEFAULT false
 );
 
 
@@ -661,12 +662,12 @@ COPY public.donjons (id, name, timer) FROM stdin;
 -- Data for Name: parties; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.parties (id, captain_id, registered_id) FROM stdin;
-1	1	1
-2	2	2
-3	3	3
-4	4	4
-5	5	5
+COPY public.parties (id, captain_id, registered_id, deleted) FROM stdin;
+1	1	1	f
+2	2	2	f
+3	3	3	f
+4	4	4	f
+5	5	5	f
 \.
 
 
